@@ -43,6 +43,8 @@ test2.tex
 test.tex
 *.md
 *.pdf
+!docs/
+!docs/*.pdf
 *.acr
 *.gls
 *.glsdefs

@@ -1,6 +1,165 @@
-\chapter{SYSTEM ARCHITECTURE AND METHODOLOGY}
+\chapter{METHODOLOGY}
 
-Present overall system design, component interactions, and methods to achieve objectives.
-Enable readers to understand system structure before implementation details.
+\section{System Block Diagram/Architecture}
+The proposed system is organized into data collection, preprocessing, dynamic graph construction, spatio-temporal forecasting, explainability, what-if analysis, backend service, and dashboard layers.
 
-\textbf{Customize the sections below based on your project's nature (hardware, software, ML, etc.). and also include relevant diagrams. }
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/sys_diagram.jpeg}
+    \caption{System Block Diagram}
+    \label{fig:sys_diagram}
+\end{figure}
+
+
+
+\section{Description of Working Principle}
+
+The proposed system works as a wind-aware air quality forecasting and decision-support system. It combines air quality data, meteorological data, dynamic graph construction, spatio-temporal deep learning, explainability, and dashboard-based visualization. The overall working principle of the system is described in the following subsections.
+
+\subsection{Data Collection}
+
+The first step of the system is data collection from selected air quality monitoring stations and meteorological data sources. The air quality data consists of pollutant concentrations such as PM$_{2.5}$, PM$_{10}$, NO$_2$, SO$_2$, CO, and O$_3$. These pollutants are selected because they are commonly used indicators for assessing air pollution levels and public health risk. Along with pollutant values, station-related information such as station location, latitude, longitude, and timestamp is also collected.
+
+In addition to air quality data, meteorological features are collected because weather conditions strongly influence the movement and concentration of pollutants. The meteorological data includes wind speed, wind direction, temperature, humidity, and atmospheric pressure. Among these features, wind speed and wind direction are especially important because they help determine how pollutants may travel from one monitoring station area to another. The collected data may be obtained from open environmental platforms, weather APIs, and publicly available benchmark datasets.
+
+\subsection{Data Cleaning and Preprocessing}
+
+After data collection, the raw data is passed through the preprocessing stage. Since air quality and meteorological datasets are collected from different sources, they may have different timestamp formats, missing readings, inconsistent sampling intervals, and abnormal values. Therefore, timestamp synchronization is performed to align pollutant and weather records according to a common time interval.
+
+Missing values are handled using suitable methods such as interpolation, forward filling, or removal depending on the amount and pattern of missing data. Abnormal readings and outliers are also checked so that extremely incorrect sensor values do not affect the model training process. After cleaning, feature normalization or standardization is applied to scale the numerical values into a suitable range. This helps the forecasting model learn efficiently and prevents features with large numerical values from dominating other important features.
+
+\subsection{Dynamic Graph Construction}
+
+In the proposed system, each air quality monitoring station is represented as a node in a graph. The relationship between two stations is represented as an edge. Unlike a static graph, where station relationships remain fixed, this system uses a dynamic graph whose edge weights can change over time based on environmental conditions.
+
+The edge weight between two stations is constructed using multiple factors. The first factor is spatial distance, where nearby stations are generally expected to have stronger influence on each other. The second factor is pollutant correlation, where stations showing similar pollution patterns are connected more strongly. The third and most important factor is wind information. If the wind direction indicates that pollutants can move from one station toward another, the connection between those stations becomes stronger. Wind speed is also considered because stronger wind may increase the movement of pollutants over a larger area.
+
+By combining distance, pollutant similarity, wind direction, and wind speed, the system creates a wind-aware dynamic graph. This graph helps the model understand not only which stations are geographically close, but also which stations are likely to influence each other due to changing wind conditions.
+
+\subsection{Spatio-Temporal Forecasting Model}
+
+The processed data and the dynamic graph are given as input to the forecasting model. The forecasting model is designed to learn both spatial and temporal dependencies. Spatial dependency refers to the relationship between different monitoring stations, while temporal dependency refers to the change in pollutant concentration over time.
+
+Graph-based neural network layers such as Graph Convolutional Network (GCN) or Graph Attention Network (GAT) are used to learn spatial relationships between stations. These layers use the dynamic graph to understand how pollution at one station may influence nearby or downwind stations. After spatial feature extraction, recurrent or sequence-based layers such as GRU or LSTM are used to learn temporal patterns from historical data. These temporal layers help the model understand how pollution levels change over hours or days.
+
+The model is trained using historical air quality and weather data. During training, the predicted pollutant concentration is compared with the actual observed concentration. The prediction error is calculated using loss functions, and the model parameters are updated to reduce this error. After training, the model becomes capable of forecasting future pollutant concentrations for selected stations and time horizons.
+
+\subsection{Forecast Generation}
+
+Once the model is trained, it is used to generate future air quality forecasts. The system takes recent air quality readings, weather features, and current wind conditions as input. Based on these inputs, the dynamic graph is updated and the forecasting model predicts future pollutant concentrations.
+
+The output may include predicted values of pollutants such as PM$_{2.5}$ or PM$_{10}$ for the next few hours or days. These predicted values can also be converted into air quality risk levels such as good, moderate, unhealthy, or hazardous depending on the selected air quality index standard. This makes the output easier to understand for non-technical users.
+
+\subsection{Explainability Module}
+
+In addition to forecasting, the system includes an explainability module to make the model output more interpretable. Air quality forecasting models can be complex, especially when graph neural networks and temporal models are used. Therefore, explainability is important to understand why the model produces a certain forecast.
+
+The explainability module identifies important weather features, influential neighboring stations, and significant time periods that contribute to the prediction. For example, the system may show that high PM$_{2.5}$ concentration at a station is influenced by strong wind flow from a nearby polluted station. Similarly, it may identify wind direction, humidity, or previous pollutant concentration as important factors for a high-pollution event. This helps users understand the reasoning behind the forecast rather than only viewing the final predicted value.
+
+\subsection{What-If Scenario Analysis}
+
+The system also includes a what-if scenario analysis module for decision support. This module allows users to observe how air quality may change under different hypothetical conditions. For example, users may analyze the possible effect of reduced emissions, changes in wind direction, or mitigation measures in a specific area.
+
+By modifying selected input conditions and observing the forecasted output, the system can support environmental planning and policy-related analysis. Although the scenario results are not direct real-world guarantees, they provide useful insights into possible pollution trends and the relative impact of different environmental conditions.
+
+\subsection{Dashboard and Visualization}
+
+The final output of the system is presented through an interactive dashboard. The dashboard displays forecasted pollutant concentration, air quality risk levels, spatial pollution maps, trend graphs, and explanation-based insights. It allows users to view pollution patterns across different monitoring stations and understand how wind may affect pollutant movement.
+
+The dashboard may also include reports and visual summaries for easier interpretation. Researchers can use the dashboard to analyze model behavior, while policymakers and concerned users can use it to understand air quality risk and possible mitigation strategies. Thus, the dashboard acts as the final decision-support interface of the proposed system.
+
+\subsection{Overall System Flow}
+
+Overall, the system starts by collecting air quality and meteorological data, followed by preprocessing and synchronization of the collected records. A dynamic graph is then constructed using station distance, pollutant correlation, and wind information. The spatio-temporal forecasting model uses this graph and historical data to predict future air quality. The explainability and scenario analysis modules provide meaningful interpretation of the results, and the final outputs are displayed through a dashboard for practical decision support.
+
+\section{Flowchart}
+\Cref{fig:air_quality_flowchart} presents the overall workflow of the proposed methodology.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance=8mm,
+        process/.style={rectangle, draw, align=center, minimum width=8.2cm, minimum height=8mm},
+        arrow/.style={->, thick}
+    ]
+        \node[process] (start) {Start};
+        \node[process, below=of start] (collect) {Collect air quality and meteorological data};
+        \node[process, below=of collect] (clean) {Clean missing and inconsistent values};
+        \node[process, below=of clean] (align) {Align station data by timestamp};
+        \node[process, below=of align] (graph) {Construct dynamic station graph};
+        \node[process, below=of graph] (window) {Create input time windows};
+        \node[process, below=of window] (train) {Train baseline and ST-GNN models};
+        \node[process, below=of train] (predict) {Predict future pollutant levels};
+        \node[process, below=of predict] (evaluate) {Evaluate using MAE, RMSE, MAPE};
+        \node[process, below=of evaluate] (explain) {Generate prediction explanations};
+        \node[process, below=of explain] (display) {Display results on dashboard};
+        \node[process, below=of display] (end) {End};
+
+        \draw[arrow] (start) -- (collect);
+        \draw[arrow] (collect) -- (clean);
+        \draw[arrow] (clean) -- (align);
+        \draw[arrow] (align) -- (graph);
+        \draw[arrow] (graph) -- (window);
+        \draw[arrow] (window) -- (train);
+        \draw[arrow] (train) -- (predict);
+        \draw[arrow] (predict) -- (evaluate);
+        \draw[arrow] (evaluate) -- (explain);
+        \draw[arrow] (explain) -- (display);
+        \draw[arrow] (display) -- (end);
+    \end{tikzpicture}
+    \caption{Proposed air quality forecasting workflow}
+    \label{fig:air_quality_flowchart}
+\end{figure}
+
+\section{Instrumentation Tools}
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Proposed Technical Stack}
+    \label{tab:technical_stack}
+    \renewcommand{\arraystretch}{1.2}
+    \setlength{\tabcolsep}{4pt}
+
+    \begin{tabularx}{0.94\linewidth}{|
+        >{\raggedright\arraybackslash}p{3.0cm}|
+        >{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Category} & \textbf{Tools and Technologies} \\
+        \hline
+
+        Data Processing &
+        Python, pandas, NumPy, scikit-learn \\
+        \hline
+
+        Deep Learning &
+        PyTorch, PyTorch Geometric, optional Deep Graph Library (DGL) \\
+        \hline
+
+        Forecasting Models &
+        Persistence baseline, regression, LSTM, GRU, GCN+GRU, GAT+GRU \\
+        \hline
+
+        Data Sources &
+        OpenAQ, Open-Meteo, NASA POWER, public benchmark air quality datasets \\
+        \hline
+
+        Backend &
+        FastAPI, Representational State Transfer (REST) services, experiment result APIs \\
+        \hline
+
+        Frontend &
+        React or Next.js, Leaflet or Mapbox, Recharts \\
+        \hline
+
+        Database and Storage &
+        PostgreSQL, local storage for datasets, models, and experiment logs \\
+        \hline
+
+        Deployment &
+        Docker, local server, optional cloud deployment \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Evaluation Methodology}
+The project will evaluate forecasting models using \gls{mae}, \gls{rmse}, MAPE, and horizon-wise error analysis. The proposed model will be compared with baseline temporal models to check whether dynamic graph learning improves forecasting accuracy. Explainability will be assessed qualitatively by inspecting whether important stations, weather factors, and time windows are consistent with wind direction, distance, and pollutant history. The dashboard will be evaluated based on whether it can clearly present forecasts, risk levels, explanations, and what-if scenario comparisons.

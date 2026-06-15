@@ -1,44 +1,73 @@
 \chapter{LITERATURE REVIEW}
 
+\section{Traditional Air Quality Forecasting}
+Traditional air quality forecasting methods include statistical time-series models, regression models, and interpolation techniques. These methods are useful for simple forecasting problems, but they may not effectively capture complex nonlinear and spatio-temporal pollutant patterns. Since air pollution is influenced by weather, wind, traffic, and regional interactions, station-wise forecasting alone may not be sufficient for accurate regional prediction.
 
-WRITING GUIDELINES FOR LITERATURE REVIEW CHAPTER
+Baseline models remain important in this project because they provide a clear reference point for evaluating advanced graph learning models. Persistence models, linear regression, random forest, \gls{svm}, \gls{lstm}, and \gls{gru} can be used to compare whether the proposed wind-aware \gls{stgnn} provides meaningful improvement.
 
-The Literature Review critically analyzes existing research, technologies, and solutions related to your project. It is NOT merely a summary of papers but rather a synthesis that compares approaches, identifies gaps, and justifies your project's novelty. This chapter should demonstrate your understanding of the field and position your work within the broader research landscape.
+\section{Deep Learning for Time-Series Forecasting}
+Deep learning models such as \gls{lstm} and \gls{gru} are widely used for time-series forecasting because they can learn temporal dependencies from historical data. In air quality forecasting, these models can learn how pollutant concentration changes over time. However, normal \gls{lstm} and \gls{gru} models usually focus on temporal patterns and may not fully model spatial relationships between different monitoring stations.
 
-GENERAL ORGANIZATION PRINCIPLES:
-\begin{itemize}
-    \item Structure by themes or technologies, NOT paper-by-paper summaries
-    \item Write in reverse chronological order within each theme
-    \item Compare and contrast different approaches using tables
-    \item Identify trends and gaps in existing research
-    \item Build argument for why your work is needed
-    \item Cite comprehensively but critically (15-30 high-quality references)
-    \item Each paragraph should relate reviewed work to YOUR project
-\end{itemize}
+Spatio-temporal forecasting research combines temporal sequence models with spatial models to address this limitation. For example, recent PM$_{2.5}$ forecasting work uses recurrent units with graph neural components to capture both time evolution and spatial diffusion across monitoring locations \cite{pandey2024spatialdiffusion}.
 
-HOW TO WRITE - HARDWARE PROJECTS:
+\section{Graph Neural Networks for Air Quality Forecasting}
+\glspl{gnn} can model relationships between monitoring stations by representing the monitoring network as a graph. In this graph, stations are nodes and spatial relationships are edges. Spatio-temporal \gls{gnn} models combine graph learning with temporal models to capture both spatial and temporal dependencies. This makes them suitable for air quality forecasting because pollutant levels at one station can be affected by neighboring stations.
 
-Review existing hardware systems addressing similar problems. Describe their architectures, components, performance characteristics, and limitations. Compare different: Sensor technologies, Microcontroller platforms (Arduino, Raspberry Pi, ESP32, STM32), Communication protocols (UART, I2C, SPI, WiFi, Bluetooth), Power management strategies.
+PM2.5-GNN is an example of a domain-knowledge enhanced graph neural model for PM$_{2.5}$ forecasting \cite{wang2020pm25gnn}. E-STGCN further shows that spatio-temporal graph convolutional approaches can be adapted for air pollution forecasting and can address extreme pollutant behavior in polluted cities \cite{panja2024estgcn}. These studies motivate the proposed project's use of graph-based spatial learning with temporal forecasting.
 
-For ML-enhanced hardware: Review edge AI approaches, Model optimization techniques (quantization, pruning), Inference engines (TensorFlow Lite, ONNX Runtime), Hardware accelerators (GPUs, TPUs, Neural Processing Units).
+\section{Wind-Aware Dynamic Graph Modeling}
+Many graph-based forecasting models use fixed edges based on distance or historical correlation. However, pollutant dispersion can change depending on wind speed and wind direction. A wind-aware graph can update edge weights dynamically based on whether wind flows from one station toward another. This can make the graph structure more realistic and physically meaningful.
 
-Identify gaps: existing systems too expensive, excessive power consumption, lack functionality, cannot operate in specific environments, fail to leverage modern ML techniques.
+In the proposed system, edge weights will combine distance, historical pollutant correlation, wind speed, and wind direction alignment. This approach is expected to better represent directional pollutant transport than a purely distance-based graph.
 
-Include 15-20 high-quality references from IEEE journals, conferences, and technical sources.
+\section{Explainable AI in Environmental Forecasting}
+Deep learning models are often considered black boxes. For environmental decision-support systems, explainability is important because users need to understand why a model predicts high pollution in a certain area. In this project, attention weights, feature importance, and neighboring station influence will be analyzed to provide interpretable explanations.
 
-HOW TO WRITE - ML/SOFTWARE PROJECTS:
+GNNExplainer and related explanation methods show how graph model predictions can be interpreted by identifying important graph structures and input features \cite{ying2019gnnexplainer}. For the proposed system, explanation outputs will be compared with wind direction, distance, weather features, and pollutant history to check whether the learned relationships are physically reasonable.
 
-Organize around key themes: Application domain background, Relevant algorithms or architectures (CNNs, Transformers, ensemble methods), Datasets commonly used, Evaluation methodologies, Deployment considerations.
+\section{Research Gap}
+Existing air quality forecasting methods often focus either on temporal prediction or fixed spatial relationships. A practical gap remains in combining wind-aware dynamic graph construction, explainable prediction, and scenario-based mitigation analysis in one system. This project addresses the gap by integrating public air quality data, meteorological data, spatio-temporal graph learning, explanation, and an interactive dashboard.
 
-For ML projects: Review foundational algorithms/architectures. Discuss strengths, weaknesses, computational requirements, and applicability. Compare different approaches (traditional ML vs. deep learning, supervised vs. unsupervised). Use tables to compare model architectures, performance metrics, dataset sizes, and computational costs. Critically evaluate methodologies.
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Comparison of Related Approaches and Proposed System}
+    \label{tab:related_air_quality}
+    \renewcommand{\arraystretch}{1.2}
+    \setlength{\tabcolsep}{4pt}
 
-For software projects: Review existing systems, frameworks, or applications. Discuss architectural patterns (MVC, microservices, serverless), technology stacks, scalability approaches, UI paradigms. Compare commercial vs. open-source alternatives.
+    \begin{tabularx}{0.94\linewidth}{|
+        >{\raggedright\arraybackslash}p{2.8cm}|
+        >{\raggedright\arraybackslash}p{4.4cm}|
+        >{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Approach} & \textbf{Primary Focus} & \textbf{Limitation / Difference from Proposed System} \\
+        \hline
 
-Identify research gaps: existing models don't generalize to your domain, available software lacks features, current solutions don't scale, insufficient research comparing approaches.
+        Station-wise regression &
+        Forecasts pollutant concentration for each monitoring station independently. &
+        Does not capture spatial pollutant movement or influence from neighboring stations. \\
+        \hline
 
-Aim for 20-30 high-quality references from top-tier venues (NeurIPS, ICML, CVPR, ACL, SIGMOD) and industry technical reports.
+        LSTM/GRU-based forecasting &
+        Learns temporal patterns from historical pollutant and meteorological data. &
+        Captures time dependency but may ignore station-to-station spatial influence. \\
+        \hline
 
-STRUCTURE SUGGESTIONS:
-section Related Hardware/Software Systems, section Machine Learning Approaches (if applicable), section Datasets and Benchmarks, section Evaluation Methodologies, section Research Gaps and Our Contribution
+        Fixed-graph ST-GNN &
+        Models spatial and temporal dependencies using a predefined graph structure. &
+        Graph edges are usually static and may not adapt to changing wind speed and wind direction. \\
+        \hline
 
-LaTeX quick refs: Cite with cite key, Use label and reference via Section ref, Use comparison tables with label and reference via Table ref
+        Wind-aware ST-GNN &
+        Uses distance, wind direction, wind speed, and pollutant correlation to model dynamic station influence. &
+        Provides more physically meaningful edge weighting for pollutant transport modeling. \\
+        \hline
+
+        Proposed system &
+        Combines wind-aware forecasting, explainability, risk visualization, and what-if scenario analysis. &
+        Extends forecasting results into an interpretable decision-support dashboard for air quality analysis. \\
+        \hline
+
+    \end{tabularx}
+\end{table}

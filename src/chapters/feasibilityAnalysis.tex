@@ -1,0 +1,65 @@
+\chapter{FEASIBILITY ANALYSIS}
+
+\section{Technical Feasibility}
+The project is technically feasible because public air quality datasets, weather APIs, and open-source machine learning frameworks are available. Data can be collected from OpenAQ, Open-Meteo, NASA POWER, or public benchmark datasets. The model can be developed using Python, PyTorch, PyTorch Geometric, pandas, and related tools. A smaller dataset or selected city can be used during the first phase to reduce computational complexity.
+
+\section{Operational Feasibility}
+The final system can be operated as a web-based dashboard. Users can view station-wise forecasts, risk levels, explanations, and what-if scenarios. The system is suitable as a research prototype and decision-support tool for academic demonstration. It is not intended to replace official government air quality warning systems.
+
+\section{Economic Feasibility}
+The project has low financial cost because most tools and datasets are open-source or publicly accessible. The main possible cost is cloud or \gls{gpu} usage, which can be minimized using free resources such as Google Colab or Kaggle Notebook. The estimated budget is shown in \cref{tab:project_budget}.
+
+\section{Schedule Feasibility}
+The project is feasible within one academic year if developed in phases. The first working prototype can be built using baseline models and one selected dataset. The advanced \gls{stgnn}, explainability, and scenario modules can be added progressively after the data pipeline and baseline models are stable.
+
+\section{Risk and Mitigation}
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Project Risks and Mitigation Strategies}
+    \label{tab:risk_mitigation}
+    \renewcommand{\arraystretch}{1.2}
+    \setlength{\tabcolsep}{4pt}
+
+    \begin{tabularx}{0.94\linewidth}{|
+        >{\raggedright\arraybackslash}p{3.4cm}|
+        >{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Risk} & \textbf{Mitigation Strategy} \\
+        \hline
+
+        Missing or inconsistent sensor data &
+        Use interpolation, timestamp alignment, quality checks, and selected stations with reliable coverage. \\
+        \hline
+
+        Limited station density &
+        Start with a city or benchmark dataset that has enough monitoring stations for graph modeling. \\
+        \hline
+
+        Weather data mismatch &
+        Use nearest weather grid points and align meteorological features by timestamp. \\
+        \hline
+
+        Long training time &
+        Start with lightweight baseline models and use optional GPU resources only for selected experiments. \\
+        \hline
+
+        Overfitting &
+        Use validation sets, early stopping, regularization, and comparison with simple baselines. \\
+        \hline
+
+        Weak explanation quality &
+        Compare attention-based explanations with feature importance and physical wind-direction evidence. \\
+        \hline
+
+        Dashboard complexity &
+        Build a simple \gls{mvp} first, then add maps, scenario comparison, and reporting features. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Limitations}
+The system will not replace official air quality warning systems. Prediction accuracy will depend on data quality, station density, and availability of reliable weather data. The mitigation module will be treated as a what-if decision-support tool, not a guaranteed causal policy recommendation.
+
+\section{Final Feasibility Statement}
+The proposed project is feasible as a major project because the required data sources, algorithms, and development tools are available. It has sufficient research depth through dynamic graph construction, spatio-temporal forecasting, explainability, and mitigation scenario analysis while remaining practical enough to complete within the academic project period.

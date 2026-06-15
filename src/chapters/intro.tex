@@ -1,24 +1,33 @@
-\chapter{Introduction}
-
-\noindent\textbf{CHAPTER GUIDE:} Purpose: set context, define the problem, and state objectives + scope. Must include: Background, Problem statement, Objectives, Scope and limitations. How to write: mention domain + current approaches; quantify gaps with metrics. LaTeX: Cite with cite key, reference figures and tables. General rules: formal/technical style; cite non-trivial claims; reference figures/tables in text.
+\chapter{INTRODUCTION}
 
 \section{Background}
+Air pollution is one of the most serious environmental issues affecting public health, urban planning, and quality of life. Pollutants such as PM$_{2.5}$, PM$_{10}$, NO$_2$, O$_3$, CO, and SO$_2$ can vary significantly over time and across locations. These variations are influenced by traffic, industrial activity, weather, wind direction, wind speed, temperature, humidity, and regional pollutant transport.
 
-% Test abbreviations and symbols
-This project uses \gls{ga} and \gls{ml} techniques \cite{deb2002nsga}. We also implement \gls{rl} with \gls{api} integration. The \gls{cpu} and \gls{gpu} work together for processing.
+Air quality forecasting is therefore a spatio-temporal problem. The pollutant concentration at one monitoring station depends not only on its previous readings but also on neighboring stations, meteorological conditions, and the transport of pollutants from surrounding areas. Machine learning and deep learning models such as \gls{lstm} and \gls{gru} can learn temporal patterns, but they may not fully capture spatial relationships between monitoring stations when each station is treated independently.
 
-Research shows optimization methods are crucial in modern computing \cite{smith2020}. Following IEEE guidelines \cite{ieee2022author, ieee2021editorial}, we implement state-of-the-art algorithms.
+\glspl{gnn} are suitable for learning from relational data. In the proposed project, the air quality monitoring network is represented as a graph. Each monitoring station becomes a node, and the relationship between two stations becomes an edge. By combining graph-based spatial learning with recurrent temporal learning, the system can model both station-to-station influence and pollutant variation over time.
 
-The learning rate \gls{symb:alpha} is crucial, and we use discount factor \gls{symb:gamma}. Standard deviation \gls{symb:sigma} helps measure variance with mean \gls{symb:mu}.
+\section{Motivation}
+Traditional station-wise forecasting can be insufficient because pollution does not remain fixed around one station. Pollutants can travel from one area to another due to wind and atmospheric movement. A wind-aware graph-based model can provide better insight into how pollution may spread across different monitoring stations and can adapt edge influence when wind conditions change.
 
-\section{Problem Statement}
+Another motivation is explainability. Forecasting models should not only provide predicted pollutant values but also explain why a certain area is expected to have high pollution. By analyzing attention weights, feature importance, wind direction, and neighboring station influence, the proposed system aims to provide human-understandable explanations for air quality predictions.
+
+\section{Problem Definition}
+Air quality forecasting is a challenging spatio-temporal problem because pollutant concentration at a monitoring station depends not only on its past readings, but also on surrounding stations, meteorological conditions, and wind-driven pollutant movement. Many existing forecasting approaches either treat monitoring stations independently or use fixed spatial relationships, which may not accurately represent changing pollutant dispersion caused by variations in wind direction and wind speed.
+
+Furthermore, several forecasting models provide numerical predictions without clearly explaining which neighboring stations, weather factors, or previous time steps influenced the forecast. This lack of explainability limits the usefulness of such models for environmental monitoring and decision-support. Existing systems also rarely provide scenario-based analysis to estimate how changes in pollution levels at selected locations may affect surrounding areas.
+
+Therefore, the problem addressed in this project is to design and develop an explainable wind-aware spatio-temporal forecasting framework that can model dynamic relationships between air quality monitoring stations, predict future pollutant concentrations, identify important influencing factors, and support what-if scenario analysis for mitigation planning.
 
 \section{Objectives}
-Objevtives should be SMART: Specific, Measurable, Achievable, Relevant, Time-bound. List primary and secondary objectives clearly.
+The objectives of the project are:
+\begin{enumerate}
+    \item To develop an explainable wind-aware \gls{stgnn} model for air quality forecasting using pollutant and meteorological data.
+    \item To design an interactive dashboard that visualizes predicted air quality, station-level risk, explanation of model predictions, and what-if mitigation scenarios.
+\end{enumerate}
 
 
+\section{Scope and Applications}
+The scope of this project includes air quality forecasting using data from public monitoring stations and meteorological sources. The system will focus on pollutants such as PM$_{2.5}$, PM$_{10}$, NO$_2$, and O$_3$, depending on dataset availability. The forecasting horizon may include short-term predictions such as 1 hour, 6 hours, 12 hours, and 24 hours.
 
-\section{Scope and Limitations}
-\subsection{Scope}
-
-\subsection{Limitations}
+The system will be developed as a research prototype and decision-support tool. It will not replace official government air quality warning systems. The applications of the project include air quality forecasting, environmental monitoring, pollution risk visualization, urban environmental planning support, station-level pollution influence analysis, public awareness dashboards, and what-if mitigation scenario analysis.

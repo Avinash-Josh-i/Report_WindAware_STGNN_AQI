@@ -5,6 +5,10 @@
 % Optional helper packages used by some guideline chapters
 \usepackage{tcolorbox}
 \usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric}
 \usetikzlibrary{positioning,shapes,arrows}
 
 % Glossary entries (define once, print later)
@@ -19,14 +23,14 @@
 % =====================
 
 \input{src/frontmatter/_coverWithSupervisors}
-\input{src/frontmatter/_coverBase}
+%\input{src/frontmatter/_coverBase}
 
 \clearpage
 \pagenumbering{roman}
 
-\input{src/frontmatter/certificate}
-\input{src/frontmatter/declar}
-\input{src/frontmatter/copyright}
+%\input{src/frontmatter/certificate}
+%\input{src/frontmatter/declar}
+%\input{src/frontmatter/copyright}
 
 
 
@@ -43,21 +47,16 @@
 
 \input{src/chapters/intro}
 \input{src/chapters/literatureReview}
-\input{src/chapters/requirements}
 \input{src/chapters/systemArchitectureAndMethodology}
-\input{src/chapters/implementationDetails}
-\input{src/chapters/resultAndAnalysis}
-\input{src/chapters/remainingTasks}
-\input{src/chapters/conclusion}
+\input{src/chapters/expectedOutcome}
+\input{src/chapters/projectSchedule}
+\input{src/chapters/projectBudget}
+\input{src/chapters/feasibilityAnalysis}
 
 % =====================
 % BACKMATTER / APPENDICES
 % =====================
-\clearpage
-\appendix
-\addcontentsline{toc}{chapter}{APPENDICES}
-\input{src/backmatter/back.tex}
-\input{src/backmatter/studentGuide.tex}
+% Appendices can be added after proposal approval if required.
 
 
 % =====================
@@ -65,6 +64,7 @@
 % =====================
 \renewcommand{\bibname}{REFERENCES}
 \bibliographystyle{IEEEtran}
+\nocite{*}
 \bibliography{references}
 
 \end{document}
