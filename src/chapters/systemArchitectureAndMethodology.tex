@@ -1,11 +1,11 @@
 \chapter{METHODOLOGY}
 
 \section{System Block Diagram/Architecture}
-The proposed system is organized into data collection, preprocessing, dynamic graph construction, spatio-temporal forecasting, explainability, what-if analysis, backend service, and dashboard layers.
+The proposed system is organized into data collection, preprocessing, wind-aware dynamic graph construction, spatio-temporal forecasting, explainability, storage, backend service, and dashboard layers. \Cref{fig:sys_diagram} shows the complete system architecture and how the components interact.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{src/images/figures/sys_diagram.jpeg}
+    \includegraphics[width=\textwidth]{src/images/figures/sys_diagram.png}
     \caption{System Block Diagram}
     \label{fig:sys_diagram}
 \end{figure}
@@ -14,66 +14,282 @@ The proposed system is organized into data collection, preprocessing, dynamic gr
 
 \section{Description of Working Principle}
 
-The proposed system works as a wind-aware air quality forecasting and decision-support system. It combines air quality data, meteorological data, dynamic graph construction, spatio-temporal deep learning, explainability, and dashboard-based visualization. The overall working principle of the system is described in the following subsections.
+The proposed system works as a wind-aware air quality forecasting and decision-support system for short-term PM$_{2.5}$ prediction. It combines air quality data, meteorological data, dynamic graph construction, spatio-temporal deep learning, explainability, and dashboard-based visualization. The overall working principle of the system is described in the following subsections.
 
-\subsection{Data Collection}
+\subsection{Study Area, Stations and Data Access Status}
 
-The first step of the system is data collection from selected air quality monitoring stations and meteorological data sources. The air quality data consists of pollutant concentrations such as PM$_{2.5}$, PM$_{10}$, NO$_2$, SO$_2$, CO, and O$_3$. These pollutants are selected because they are commonly used indicators for assessing air pollution levels and public health risk. Along with pollutant values, station-related information such as station location, latitude, longitude, and timestamp is also collected.
+The initial study area for this project will be Kathmandu Valley, Nepal, covering major urban and semi-urban areas of Kathmandu, Lalitpur, and Bhaktapur. Kathmandu Valley is selected as the primary study area because it experiences high air pollution due to traffic emissions, construction activities, industrial sources, dust, seasonal variation, and its bowl-shaped geography, which can trap pollutants.
 
-In addition to air quality data, meteorological features are collected because weather conditions strongly influence the movement and concentration of pollutants. The meteorological data includes wind speed, wind direction, temperature, humidity, and atmospheric pressure. Among these features, wind speed and wind direction are especially important because they help determine how pollutants may travel from one monitoring station area to another. The collected data may be obtained from open environmental platforms, weather APIs, and publicly available benchmark datasets.
+In the first stage of the project, the study will focus on selected air quality monitoring stations within Kathmandu Valley. These stations will be used to collect historical pollutant data such as PM$_{2.5}$ and PM$_{10}$, along with meteorological data such as wind speed, wind direction, temperature, humidity, and pressure where available. The initially considered stations include Ratnapark, Shankapark, TU Kirtipur, Khumaltar, Bhaisipati, Pulchowk, Bhaktapur/Birendra School, and the US Embassy monitoring station. These stations are selected because they provide coverage across different parts of the valley, including dense urban areas, residential zones, and surrounding valley regions.
 
-\subsection{Data Cleaning and Preprocessing}
+For model development, each monitoring station will be represented as a node in a graph. The relationship between stations will be defined using factors such as geographical distance, wind direction, wind speed, and pollutant similarity.
 
-After data collection, the raw data is passed through the preprocessing stage. Since air quality and meteorological datasets are collected from different sources, they may have different timestamp formats, missing readings, inconsistent sampling intervals, and abnormal values. Therefore, timestamp synchronization is performed to align pollutant and weather records according to a common time interval.
+\subsection{Dataset Description}
 
-Missing values are handled using suitable methods such as interpolation, forward filling, or removal depending on the amount and pattern of missing data. Abnormal readings and outliers are also checked so that extremely incorrect sensor values do not affect the model training process. After cleaning, feature normalization or standardization is applied to scale the numerical values into a suitable range. This helps the forecasting model learn efficiently and prevents features with large numerical values from dominating other important features.
+The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, relative humidity, and temperature. PM$_{2.5}$ concentration will serve as the target variable, whereas the remaining available variables will be used as input features. Wind speed, wind direction, atmospheric pressure, and dew point obtained from the Open-Meteo API will be considered as additional meteorological features. Wind speed and wind direction are particularly important for modeling the transport of airborne pollutants between monitoring stations. The spatial graph will therefore account for both geographical proximity and time-varying meteorological conditions.
 
-\subsection{Dynamic Graph Construction}
+\Cref{tab:integrated_dataset_sample} presents the proposed structure of the integrated dataset. The values are illustrative examples included only to demonstrate the organization of the model-ready records.
 
-In the proposed system, each air quality monitoring station is represented as a node in a graph. The relationship between two stations is represented as an edge. Unlike a static graph, where station relationships remain fixed, this system uses a dynamic graph whose edge weights can change over time based on environmental conditions.
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Illustrative Sample of the Integrated Dataset}
+    \label{tab:integrated_dataset_sample}
+    \renewcommand{\arraystretch}{1.2}
+    \setlength{\tabcolsep}{3pt}
 
-The edge weight between two stations is constructed using multiple factors. The first factor is spatial distance, where nearby stations are generally expected to have stronger influence on each other. The second factor is pollutant correlation, where stations showing similar pollution patterns are connected more strongly. The third and most important factor is wind information. If the wind direction indicates that pollutants can move from one station toward another, the connection between those stations becomes stronger. Wind speed is also considered because stronger wind may increase the movement of pollutants over a larger area.
+    \begin{tabularx}{0.94\linewidth}{|
+        >{\raggedright\arraybackslash}p{2.4cm}|
+        >{\raggedright\arraybackslash}p{2.1cm}|
+        >{\raggedright\arraybackslash}p{1.6cm}|
+        >{\raggedright\arraybackslash}p{1.6cm}|
+        >{\raggedright\arraybackslash}p{1.8cm}|
+        >{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Timestamp} & \textbf{Station} & \textbf{PM$_{2.5}$} & \textbf{PM$_1$} & \textbf{Wind Speed} & \textbf{Other Features} \\
+        \hline
 
-By combining distance, pollutant similarity, wind direction, and wind speed, the system creates a wind-aware dynamic graph. This graph helps the model understand not only which stations are geographically close, but also which stations are likely to influence each other due to changing wind conditions.
+        2026-01-01 01:00 &
+        Ratnapark &
+        72.4 &
+        41.2 &
+        1.8 &
+        RH, temperature, pressure, dew point, wind direction \\
+        \hline
+
+        2026-01-01 01:00 &
+        Khumaltar &
+        58.7 &
+        33.5 &
+        2.1 &
+        RH, temperature, pressure, dew point, wind direction \\
+        \hline
+
+        2026-01-01 01:00 &
+        Bhaktapur &
+        64.9 &
+        37.8 &
+        1.5 &
+        RH, temperature, pressure, dew point, wind direction \\
+        \hline
+
+    \end{tabularx}
+\end{table}
+
+In \Cref{tab:integrated_dataset_sample}, PM$_{2.5}$ and PM$_1$ concentrations are expressed in $\mu g/m^3$, relative humidity is expressed as a percentage, temperature and dew point are expressed in degrees Celsius, atmospheric pressure is expressed in hPa, wind speed is expressed in m/s, and wind direction is expressed in degrees. The displayed values are illustrative rather than actual observations.
+
+\subsection{Input Variables, Resolution and Prediction Target}
+
+The proposed model will use hourly air quality and meteorological observations from multiple monitoring stations. Let $N$ represent the number of monitoring stations and $F$ represent the number of input features. At each time step $t$, the observations are represented as a node feature matrix:
+
+\[
+X_t \in \mathbb{R}^{N \times F}
+\]
+
+where each row represents a monitoring station and each column represents a pollutant, meteorological, or temporal feature.
+
+To capture temporal patterns, the model will use a sliding window of past observations. The default input window will be 24 hours, with a 48-hour window also tested for comparison. The primary forecasting horizon is 6 hours. Additional horizons of 1, 12, and 24 hours will be tested for comparison.
+
+The main input variables will include PM$_{2.5}$, PM$_1$, temperature, humidity, wind speed, wind direction, and temporal features such as hour of day, day of week, month, and season. Wind direction will be converted into sine and cosine components because it is a circular variable. Missingness indicators may also be added to show whether a value was observed or imputed.
+
+The primary prediction target is future PM$_{2.5}$ concentration at each monitoring station. For station $i$ and forecasting horizon $h$, the target value is represented as:
+
+\[
+y_i^{(t+h)}
+\]
+
+and the model prediction is represented as:
+
+\[
+\hat{y}_i^{(t+h)}
+\]
+
+Therefore, the task is formulated as a regression problem, where the model learns to minimize the difference between actual and predicted PM$_{2.5}$ values across all stations and time steps. Although the model predicts numerical PM$_{2.5}$ values, air quality categories such as good, moderate, unhealthy, and hazardous will be generated later in the post-processing stage using standard AQI threshold values.
+
+\subsection{Data Preprocessing}
+
+The collected air quality and meteorological data undergo a preprocessing stage before being used for graph construction and model training. Since the data are obtained from multiple sources, including OpenAQ and Open-Meteo, preprocessing is necessary to ensure consistency, reliability, and compatibility across all monitoring stations and environmental variables.
+
+Air quality observations and meteorological records are first aligned according to their timestamps. Since the proposed system operates on hourly observations, all records are resampled and synchronized to a common hourly interval. For each monitoring station, PM$_{2.5}$, PM$_1$, temperature, humidity, wind speed, and wind direction measurements corresponding to the same timestamp are merged into a unified observation record. This temporal alignment ensures that all input variables represent the same environmental conditions at a given time step and prevents inconsistencies during model training.
+
+The collected datasets are inspected for missing observations. Any missing values identified within the pollutant or meteorological variables are handled using appropriate interpolation techniques. Short gaps in continuous measurements are filled through linear interpolation, while larger missing segments may be removed if sufficient neighboring information is unavailable. This process helps preserve temporal continuity while reducing information loss caused by incomplete observations.
+
+Environmental monitoring data may contain abnormal values caused by sensor malfunctions, communication errors, or measurement noise. Therefore, the dataset is examined for unrealistic or extreme observations. Basic statistical analysis and visualization techniques are used to identify potential outliers. Records containing physically impossible values, such as negative pollutant concentrations or invalid meteorological measurements, are removed or corrected according to data quality guidelines using either capping or log transformation.
+
+The collected variables have different numerical ranges and units. To ensure stable neural network training, all numerical features are normalized before being supplied to the forecasting model. Min-Max normalization is applied to transform each feature into a common numerical range between 0 and 1. The normalized value of each feature is computed as:
+
+\[
+X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}
+\]
+
+where $X$ represents the original feature value, $X_{min}$ is the minimum observed value, and $X_{max}$ is the maximum observed value within the training dataset.
+
+After preprocessing and normalization, the sequential observations are converted into fixed-length temporal windows for forecasting. A sliding-window approach is used to construct input sequences from historical observations. For example, if a 24-hour look-back period is selected, the model receives pollutant and meteorological observations from the previous 24 hours and predicts the PM$_{2.5}$ and PM$_1$ concentration for the next forecasting horizon.
+
+The final output of the preprocessing stage is a clean, synchronized, normalized, and temporally structured dataset containing station-wise pollutant and meteorological observations. These processed records are subsequently used for dynamic graph construction and spatio-temporal forecasting.
+
+\subsection{Wind-Aware Dynamic Graph Construction}
+
+The proposed system models air quality monitoring stations as a dynamic graph in order to capture spatial and meteorological dependencies among different locations within Kathmandu Valley. Unlike conventional static graphs that use only fixed geographical distance or historical correlation, the proposed approach constructs a wind-aware dynamic graph that adapts edge relationships based on time-varying meteorological conditions.
+
+Let the air quality monitoring network be defined as a graph:
+
+\[
+G_t = (V, E_t, A_t)
+\]
+
+where $V$ represents the set of monitoring stations, $E_t$ represents the set of edges at time $t$, and $A_t$ represents the adjacency matrix at time $t$. Each node $v_i \in V$ corresponds to a monitoring station and is associated with a feature vector:
+
+\[
+X_i^t = [PM_{2.5}, PM_1, Temperature, Humidity, WindSpeed, WindDirection]
+\]
+
+An edge between two stations $i$ and $j$ is defined based on geographical distance, historical pollutant correlation, wind speed, and wind direction alignment. Thus, the edge weight is defined as a composite function:
+
+\[
+A_{ij}^t = f_d(i,j) \cdot f_c(i,j) \cdot f_w(i,j,t)
+\]
+
+Spatial proximity between stations is modeled using normalized inverse distance:
+
+\[
+f_d(i,j) = \exp\left(-\frac{d_{ij}}{\sigma_d}\right)
+\]
+
+where $d_{ij}$ is the geographical distance between stations $i$ and $j$, and $\sigma_d$ is a scaling parameter controlling spatial decay.
+
+To capture long-term similarity in pollution patterns, historical correlation is computed as:
+
+\[
+f_c(i,j) = \operatorname{corr}(PM2.5_i, PM2.5_j)
+\]
+
+The key contribution of the proposed system is the incorporation of wind-driven pollutant transport. Wind influence is modeled as:
+
+\[
+f_w(i,j,t) = \alpha \cdot \cos(\theta_{ij} - \theta_t) \cdot WS_t
+\]
+
+where $\theta_{ij}$ is the direction from station $i$ to station $j$, $\theta_t$ is the wind direction at time $t$, $WS_t$ is the wind speed at time $t$, and $\alpha$ is a scaling factor. This formulation increases influence when wind flows from one station toward another, decreases influence when wind flows in the opposite direction, and amplifies spatial propagation effects during stronger wind conditions.
+
+The final adjacency matrix is time-dependent and is updated at every time step to reflect changing meteorological conditions:
+
+\[
+A_t =
+\begin{bmatrix}
+A_{11}^t & A_{12}^t & \cdots & A_{1n}^t \\
+A_{21}^t & A_{22}^t & \cdots & A_{2n}^t \\
+\vdots & \vdots & \ddots & \vdots \\
+A_{n1}^t & A_{n2}^t & \cdots & A_{nn}^t
+\end{bmatrix}
+\]
+
+The output of this module is the dynamic adjacency matrix $A_t$, the node feature matrix $X_t$, and the edge-weighted graph representation $G_t$. These outputs are subsequently used as input to the graph attention layer for spatial feature learning.
+
+\subsection{Virtual Node Construction for Unmonitored Locations}
+
+A key novelty of this project is the use of virtual nodes to estimate air pollution at locations where physical air quality monitoring stations are not available. In real-world settings, monitoring stations are limited and cannot represent every road, neighborhood, or residential area. To address this limitation, the proposed system will allow selected map locations to be represented as virtual nodes within the graph.
+
+A virtual node represents an unmonitored geographic location selected from the map. Unlike physical stations, this node does not have direct sensor readings. Therefore, its initial feature values will be estimated using information from nearby monitoring stations. The connection between the virtual node and real stations will be determined using geographical distance, wind direction, wind speed, and pollutant similarity. Stations that are closer or located along the wind flow direction will be assigned stronger influence.
+
+Formally, if there are $N$ real monitoring stations and $V$ virtual nodes, the graph is expanded as:
+
+\[
+N' = N + V
+\]
+
+where $N'$ is the total number of real and virtual nodes in the graph. The model then performs prediction over both physical monitoring stations and virtual nodes.
+
+The virtual node mechanism enables the system to estimate PM$_{2.5}$ concentration at unmonitored locations and generate a more continuous air pollution map. This is useful for identifying pollution patterns in areas without sensors and for improving the practical usability of the forecasting system.
+
+To validate this approach, a leave-one-station-out strategy may be used. In this method, one real station is temporarily treated as a virtual node, and its actual PM$_{2.5}$ values are hidden from the model during prediction. The predicted values are then compared with the actual station readings. This allows the performance of virtual-node-based prediction to be evaluated even when real ground truth is not available for completely unmonitored locations.
 
 \subsection{Spatio-Temporal Forecasting Model}
 
-The processed data and the dynamic graph are given as input to the forecasting model. The forecasting model is designed to learn both spatial and temporal dependencies. Spatial dependency refers to the relationship between different monitoring stations, while temporal dependency refers to the change in pollutant concentration over time.
+The proposed system employs a hybrid Graph Attention Network and Gated Recurrent Unit architecture to model both spatial and temporal dependencies in air quality data. This combination enables the model to capture pollutant interactions across monitoring stations as well as temporal variations over time.
 
-Graph-based neural network layers such as Graph Convolutional Network (GCN) or Graph Attention Network (GAT) are used to learn spatial relationships between stations. These layers use the dynamic graph to understand how pollution at one station may influence nearby or downwind stations. After spatial feature extraction, recurrent or sequence-based layers such as GRU or LSTM are used to learn temporal patterns from historical data. These temporal layers help the model understand how pollution levels change over hours or days.
+In addition to forecasting PM$_{2.5}$ at physical monitoring stations, the model will also support prediction at virtual nodes. These virtual nodes represent unmonitored map locations and are connected to the existing station graph using wind-aware spatial relationships. This allows the GAT-GRU model to estimate pollution levels beyond the available sensor network.
 
-The model is trained using historical air quality and weather data. During training, the predicted pollutant concentration is compared with the actual observed concentration. The prediction error is calculated using loss functions, and the model parameters are updated to reduce this error. After training, the model becomes capable of forecasting future pollutant concentrations for selected stations and time horizons.
+At each time step $t$, the model receives a node feature matrix:
 
-\subsection{Forecast Generation}
+\[
+X_t \in \mathbb{R}^{N \times F}
+\]
 
-Once the model is trained, it is used to generate future air quality forecasts. The system takes recent air quality readings, weather features, and current wind conditions as input. Based on these inputs, the dynamic graph is updated and the forecasting model predicts future pollutant concentrations.
+and a dynamic adjacency matrix:
 
-The output may include predicted values of pollutants such as PM$_{2.5}$ or PM$_{10}$ for the next few hours or days. These predicted values can also be converted into air quality risk levels such as good, moderate, unhealthy, or hazardous depending on the selected air quality index standard. This makes the output easier to understand for non-technical users.
+\[
+A_t \in \mathbb{R}^{N \times N}
+\]
+
+where $N$ represents the number of monitoring stations and $F$ represents the number of input features per station. The adjacency matrix is generated from the wind-aware graph using factors such as geographical distance, wind direction, wind speed, and pollutant similarity.
+
+The Graph Attention Network captures spatial influence between monitoring stations. For each station $i$, the GAT layer aggregates information from neighboring stations using attention weights:
+
+\[
+h_i^t = \sigma \left( \sum_{j \in \mathcal{N}(i)} \alpha_{ij}^t W x_j^t \right)
+\]
+
+where $x_j^t$ is the feature vector of neighboring station $j$, $W$ is a learnable weight matrix, $\alpha_{ij}^t$ is the attention coefficient, $\mathcal{N}(i)$ represents the neighboring stations of station $i$, and $\sigma$ is a non-linear activation function. The attention coefficient $\alpha_{ij}^t$ shows how much influence station $j$ has on station $i$ at time $t$. This also supports model explainability because the learned attention weights can help identify which nearby stations contribute most to a prediction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{src/images/figures/spatial_modeling.jpg}
+    \caption{Spatial modeling using graph attention}
+    \label{fig:spatial_modeling}
+\end{figure}
+
+The spatial output of the GAT layer is represented as:
+
+\[
+H_t = GAT(X_t, A_t)
+\]
+
+To capture temporal dependencies, the spatial embeddings from multiple previous time steps are passed into a GRU network. For an input window of length $L$, the GRU processes:
+
+\[
+H_{t-L+1:t}
+\]
+
+The hidden state is updated as:
+
+\[
+z_t = GRU(H_t, z_{t-1})
+\]
+
+where $H_t$ is the spatial embedding at time $t$, and $z_t$ is the hidden state that captures temporal evolution. This allows the model to learn short-term pollution changes, delayed meteorological effects, and temporal persistence in PM$_{2.5}$ concentration.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{src/images/figures/temporal_modeling.png}
+    \caption{Temporal modeling using GRU}
+    \label{fig:temporal_modeling}
+\end{figure}
+
+The final hidden representation from the GRU is passed through a fully connected regression layer to predict future PM$_{2.5}$ concentration at each station:
+
+\[
+\hat{y}_{t+h} = W_o z_t + b
+\]
+
+where $\hat{y}_{t+h}$ is the predicted PM$_{2.5}$ concentration after horizon $h$, and $h \in \{1, 6, 12, 24\}$. The one-hour horizon represents the single-step forecasting case, while 6, 12, and 24-hour horizons are used for multi-horizon forecasting. The overall architecture can be summarized as input features, wind-aware graph construction, GAT layer, GRU layer, and regression output.
 
 \subsection{Explainability Module}
 
-In addition to forecasting, the system includes an explainability module to make the model output more interpretable. Air quality forecasting models can be complex, especially when graph neural networks and temporal models are used. Therefore, explainability is important to understand why the model produces a certain forecast.
+The proposed system includes an explainability module to help interpret the predictions generated by the wind-aware spatio-temporal forecasting model. Since the model uses GAT and GRU layers, the explanation focuses on spatial influence, feature contribution, and temporal importance.
 
-The explainability module identifies important weather features, influential neighboring stations, and significant time periods that contribute to the prediction. For example, the system may show that high PM$_{2.5}$ concentration at a station is influenced by strong wind flow from a nearby polluted station. Similarly, it may identify wind direction, humidity, or previous pollutant concentration as important factors for a high-pollution event. This helps users understand the reasoning behind the forecast rather than only viewing the final predicted value.
+Spatial explainability is obtained from the attention weights learned by the GAT layer. For a target station or virtual node, the attention coefficient $\alpha_{ij}$ shows how much neighboring station $j$ contributes to the prediction at node $i$. These attention values help identify the most influential stations, possible pollutant movement direction, and the effect of wind-aware graph connections. This is especially useful when estimating PM$_{2.5}$ at virtual nodes, as it can show which real monitoring stations influenced the predicted value.
 
-\subsection{What-If Scenario Analysis}
+Feature-level explainability will be analyzed using SHAP or similar feature importance methods. This will help identify how much each input variable, such as past PM$_{2.5}$, PM$_{10}$, wind speed, wind direction, temperature, humidity, and temporal features, contributes to the final prediction. This allows the system to explain why a predicted pollution value is high or low.
 
-The system also includes a what-if scenario analysis module for decision support. This module allows users to observe how air quality may change under different hypothetical conditions. For example, users may analyze the possible effect of reduced emissions, changes in wind direction, or mitigation measures in a specific area.
+Temporal interpretability will be studied by analyzing how different historical time windows affect the forecast. Since the GRU learns from past observations, this analysis helps understand whether the prediction is mainly influenced by recent pollution spikes, delayed weather effects, or persistent pollution patterns.
 
-By modifying selected input conditions and observing the forecasted output, the system can support environmental planning and policy-related analysis. Although the scenario results are not direct real-world guarantees, they provide useful insights into possible pollution trends and the relative impact of different environmental conditions.
+The explainability outputs will be presented through visualizations such as station influence maps, attention-based graph plots, feature importance charts, and time-series plots. These explanations will make the model more transparent and useful for air quality monitoring, pollution interpretation, and decision support.
 
-\subsection{Dashboard and Visualization}
-
-The final output of the system is presented through an interactive dashboard. The dashboard displays forecasted pollutant concentration, air quality risk levels, spatial pollution maps, trend graphs, and explanation-based insights. It allows users to view pollution patterns across different monitoring stations and understand how wind may affect pollutant movement.
-
-The dashboard may also include reports and visual summaries for easier interpretation. Researchers can use the dashboard to analyze model behavior, while policymakers and concerned users can use it to understand air quality risk and possible mitigation strategies. Thus, the dashboard acts as the final decision-support interface of the proposed system.
-
-\subsection{Overall System Flow}
-
-Overall, the system starts by collecting air quality and meteorological data, followed by preprocessing and synchronization of the collected records. A dynamic graph is then constructed using station distance, pollutant correlation, and wind information. The spatio-temporal forecasting model uses this graph and historical data to predict future air quality. The explainability and scenario analysis modules provide meaningful interpretation of the results, and the final outputs are displayed through a dashboard for practical decision support.
-
+\clearpage
+\begin{samepage}
 \section{Flowchart}
-\Cref{fig:air_quality_flowchart} presents the overall workflow of the proposed methodology.
+\Cref{fig:air_quality_flowchart} presents the overall workflow from data collection to dashboard visualization.
 
 \begin{figure}[H]
     \centering
@@ -86,11 +302,11 @@ Overall, the system starts by collecting air quality and meteorological data, fo
         \node[process, below=of start] (collect) {Collect air quality and meteorological data};
         \node[process, below=of collect] (clean) {Clean missing and inconsistent values};
         \node[process, below=of clean] (align) {Align station data by timestamp};
-        \node[process, below=of align] (graph) {Construct dynamic station graph};
+        \node[process, below=of align] (graph) {Construct wind-aware dynamic graph};
         \node[process, below=of graph] (window) {Create input time windows};
-        \node[process, below=of window] (train) {Train baseline and ST-GNN models};
+        \node[process, below=of window] (train) {Train baseline and GAT-GRU models};
         \node[process, below=of train] (predict) {Predict future pollutant levels};
-        \node[process, below=of predict] (evaluate) {Evaluate using MAE, RMSE, MAPE};
+        \node[process, below=of predict] (evaluate) {Evaluate regression and peak-event metrics};
         \node[process, below=of evaluate] (explain) {Generate prediction explanations};
         \node[process, below=of explain] (display) {Display results on dashboard};
         \node[process, below=of display] (end) {End};
@@ -110,6 +326,7 @@ Overall, the system starts by collecting air quality and meteorological data, fo
     \caption{Proposed air quality forecasting workflow}
     \label{fig:air_quality_flowchart}
 \end{figure}
+\end{samepage}
 
 \section{Instrumentation Tools}
 \begin{table}[H]
@@ -132,27 +349,27 @@ Overall, the system starts by collecting air quality and meteorological data, fo
         \hline
 
         Deep Learning &
-        PyTorch, PyTorch Geometric, optional Deep Graph Library (DGL) \\
+        PyTorch, PyTorch Geometric, SHAP \\
         \hline
 
         Forecasting Models &
-        Persistence baseline, regression, LSTM, GRU, GCN+GRU, GAT+GRU \\
+        Persistence model, linear/tree regression, GRU, GAT-GRU \\
         \hline
 
         Data Sources &
-        OpenAQ, Open-Meteo, NASA POWER, public benchmark air quality datasets \\
+        OpenAQ, Open-Meteo \\
         \hline
 
         Backend &
-        FastAPI, Representational State Transfer (REST) services, experiment result APIs \\
+        FastAPI, Representational State Transfer (REST) services \\
         \hline
 
         Frontend &
-        React or Next.js, Leaflet or Mapbox, Recharts \\
+        React, Leaflet or Mapbox, Recharts \\
         \hline
 
         Database and Storage &
-        PostgreSQL, local storage for datasets, models, and experiment logs \\
+        PostgreSQL, CSV/Parquet files, local storage for datasets, models, and experiment logs \\
         \hline
 
         Deployment &
@@ -162,4 +379,59 @@ Overall, the system starts by collecting air quality and meteorological data, fo
 \end{table}
 
 \section{Evaluation Methodology}
-The project will evaluate forecasting models using \gls{mae}, \gls{rmse}, MAPE, and horizon-wise error analysis. The proposed model will be compared with baseline temporal models to check whether dynamic graph learning improves forecasting accuracy. Explainability will be assessed qualitatively by inspecting whether important stations, weather factors, and time windows are consistent with wind direction, distance, and pollutant history. The dashboard will be evaluated based on whether it can clearly present forecasts, risk levels, explanations, and what-if scenario comparisons.
+
+\subsection{Evaluation Metrics}
+
+The project will evaluate forecasting models using regression metrics and horizon-wise error analysis. The proposed GAT-GRU model will be compared with baseline models to check whether dynamic graph learning improves forecasting accuracy.
+
+Mean Absolute Error (MAE) measures the average absolute prediction error in PM$_{2.5}$ values:
+
+\[
+MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+\]
+
+Root Mean Squared Error (RMSE) penalizes large errors more strongly and is useful for evaluating pollution spikes:
+
+\[
+RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
+\]
+
+Mean Absolute Percentage Error (MAPE) measures prediction error in percentage form:
+
+\[
+MAPE = \frac{1}{n} \sum_{i=1}^{n} \left|\frac{y_i - \hat{y}_i}{y_i}\right| \times 100
+\]
+
+The $R^2$ score shows how well the model explains variation in PM$_{2.5}$ concentration:
+
+\[
+R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
+\]
+
+Bias indicates whether the model generally overpredicts or underpredicts:
+
+\[
+Bias = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)
+\]
+
+\subsection{Peak Metrics}
+
+Peak-event metrics will be used to evaluate whether the system can identify high-pollution events. Precision measures how many predicted pollution events were actually correct:
+
+\[
+Precision = \frac{TP}{TP + FP}
+\]
+
+Recall, also known as probability of detection, measures how many actual pollution events were correctly detected:
+
+\[
+Recall = \frac{TP}{TP + FN}
+\]
+
+The F1 score balances precision and recall for event detection performance:
+
+\[
+F1 = \frac{2 \cdot Precision \cdot Recall}{Precision + Recall}
+\]
+
+Explainability will be assessed qualitatively by inspecting whether important stations, weather factors, and time windows are consistent with wind direction, distance, and pollutant history. The dashboard will be evaluated based on whether it can clearly present forecasts, AQI categories, spatial maps, explanation visualizations, and what-if scenario comparisons.

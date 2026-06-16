@@ -1,25 +1,33 @@
 \chapter{EXPECTED OUTCOME}
 
-The primary goal of this project is to develop and validate a research-grade prototype for explainable, wind-aware air quality forecasting. The proposed system serves as a decision-support tool by bridging the gap between raw environmental data and actionable policy insights.
+The project aims to deliver a working research prototype for short-term PM$_{2.5}$ forecasting in selected Kathmandu Valley stations with explainable spatio-temporal modeling. The proposed system is expected to support air quality forecasting, interpretation, visualization, and decision-support analysis.
 
 \section{Technical Outcomes}
 
 The expected technical outcomes of the project are as follows:
 
 \begin{itemize}
-    \item \textbf{Robust Data Pipeline:}  
-    A fully automated preprocessing framework for multi-source data ingestion, timestamp synchronization, outlier detection, missing value handling, and normalization to support high-quality model training.
+    \item \textbf{Cleaned and Documented Dataset:}  
+    A cleaned and well-documented station dataset with station metadata, hourly pollutant observations, meteorological variables, preprocessing records, and model-ready input features.
 
-    \item \textbf{Wind-Aware Dynamic Graph Engine:}  
-    A dynamic graph construction method that updates station-to-station relationships by integrating spatial distance, pollutant correlations, and wind direction and speed information.
+    \item \textbf{Preprocessing Pipeline:}  
+    A structured preprocessing framework for timestamp synchronization, missing value handling, outlier detection, feature scaling, temporal window generation, and integration of OpenAQ and Open-Meteo data.
 
-    \item \textbf{Hybrid Forecasting Framework:}  
-    A forecasting framework consisting of traditional baseline models such as LSTM and GRU, along with advanced spatio-temporal graph neural network models such as GCN-GRU and GAT-GRU for performance benchmarking.
+    \item \textbf{Wind-Aware Dynamic Graph Module:}  
+    A dynamic graph construction method that combines geographical distance, PM$_{2.5}$ correlation, wind direction alignment, and wind speed to model changing station-to-station influence.
 
-    \item \textbf{Explainability and Decision Support Module:}  
-    A module that interprets model outputs to provide human-readable insights, such as important meteorological features, influential neighboring stations, and temporal factors contributing to high-pollution events.
+    \item \textbf{Virtual Node Estimation Mechanism:}  
+    A graph-based method for estimating PM$_{2.5}$ concentration at unmonitored map locations using nearby real monitoring stations and wind-aware spatial relationships.
 
-    \item \textbf{Interactive Analytics Dashboard:}  
-    A centralized visualization platform for displaying air quality forecasts, spatial risk maps, historical trends, and interpretability reports for end-users.
+    \item \textbf{Baseline and Primary Forecasting Models:}  
+    Baseline models and a primary GAT-GRU forecasting model evaluated using standard regression metrics and peak-event detection metrics.
+
+    \item \textbf{Explainability Module:}  
+    An explanation component that provides station influence analysis, SHAP-based feature importance, and temporal sensitivity analysis for interpreting model predictions.
+
+    \item \textbf{Interactive Dashboard:}  
+    An interactive dashboard showing PM$_{2.5}$ forecasts, AQI categories, spatial maps, station-wise trends, virtual-node estimates, and explanation visualizations.
+
+    \item \textbf{Complete Project Report:}  
+    A complete project report including methodology, implementation details, performance analysis, limitations, feasibility discussion, and future enhancement possibilities.
 \end{itemize}
-
