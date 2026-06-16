@@ -1,73 +1,73 @@
 \chapter{LITERATURE REVIEW}
 
-\section{Traditional Air Quality Forecasting}
-Traditional air quality forecasting methods include statistical time-series models, regression models, and interpolation techniques. These methods are useful for simple forecasting problems, but they may not effectively capture complex nonlinear and spatio-temporal pollutant patterns. Since air pollution is influenced by weather, wind, traffic, and regional interactions, station-wise forecasting alone may not be sufficient for accurate regional prediction.
+\section{Air Quality Forecasting and the Need for Spatio-Temporal Modeling}
 
-Baseline models remain important in this project because they provide a clear reference point for evaluating advanced graph learning models. Persistence models, linear regression, random forest, \gls{svm}, \gls{lstm}, and \gls{gru} can be used to compare whether the proposed wind-aware \gls{stgnn} provides meaningful improvement.
+Air pollution is a serious environmental and public-health issue because pollutant concentration does not remain constant across location or time. Pollutants such as PM$_{2.5}$, PM$_{10}$, NO$_2$, and O$_3$ are affected by many factors, including traffic emissions, industrial activities, dust, temperature, humidity, atmospheric pressure, wind speed, and wind direction. Because of this, forecasting air quality is not only a time-series problem but also a spatial problem. The pollution level at one monitoring station may depend on its own past readings, but it may also be influenced by nearby or upwind stations.
 
-\section{Deep Learning for Time-Series Forecasting}
-Deep learning models such as \gls{lstm} and \gls{gru} are widely used for time-series forecasting because they can learn temporal dependencies from historical data. In air quality forecasting, these models can learn how pollutant concentration changes over time. However, normal \gls{lstm} and \gls{gru} models usually focus on temporal patterns and may not fully model spatial relationships between different monitoring stations.
+Traditional forecasting methods such as statistical models, regression-based models, support vector machines, random forest, \gls{lstm}, and \gls{gru} have been widely used for environmental prediction. These methods are useful as baseline models because they can learn historical trends and short-term temporal patterns. However, many of them treat each monitoring station independently. In reality, monitoring stations are connected through atmospheric movement and pollutant transport. For example, if pollution is high in one area and wind carries polluted air toward another area, the second area may experience increased pollution after some time. This kind of relationship cannot be fully captured by station-wise models alone.
 
-Spatio-temporal forecasting research combines temporal sequence models with spatial models to address this limitation. For example, recent PM$_{2.5}$ forecasting work uses recurrent units with graph neural components to capture both time evolution and spatial diffusion across monitoring locations \cite{pandey2024spatialdiffusion}.
+Recent air quality forecasting studies have therefore moved toward spatio-temporal modeling. In this approach, the model learns both temporal dependency and spatial dependency. Temporal dependency means how pollution changes over hours or days, while spatial dependency means how one location may influence another. This idea is important for the proposed project because the system aims to forecast pollutant levels by combining historical pollution data, meteorological data, and relationships between monitoring stations.
 
-\section{Graph Neural Networks for Air Quality Forecasting}
-\glspl{gnn} can model relationships between monitoring stations by representing the monitoring network as a graph. In this graph, stations are nodes and spatial relationships are edges. Spatio-temporal \gls{gnn} models combine graph learning with temporal models to capture both spatial and temporal dependencies. This makes them suitable for air quality forecasting because pollutant levels at one station can be affected by neighboring stations.
+\section{Graph Neural Networks for Station-Based Air Quality Forecasting}
 
-PM2.5-GNN is an example of a domain-knowledge enhanced graph neural model for PM$_{2.5}$ forecasting \cite{wang2020pm25gnn}. E-STGCN further shows that spatio-temporal graph convolutional approaches can be adapted for air pollution forecasting and can address extreme pollutant behavior in polluted cities \cite{panja2024estgcn}. These studies motivate the proposed project's use of graph-based spatial learning with temporal forecasting.
+\glspl{gnn} provide a suitable framework for modeling air quality monitoring networks. In a graph-based representation, each air quality monitoring station can be considered as a node, and the relationship between two stations can be represented as an edge. This allows the model to learn how stations interact with each other rather than treating every station as completely independent.
 
-\section{Wind-Aware Dynamic Graph Modeling}
-Many graph-based forecasting models use fixed edges based on distance or historical correlation. However, pollutant dispersion can change depending on wind speed and wind direction. A wind-aware graph can update edge weights dynamically based on whether wind flows from one station toward another. This can make the graph structure more realistic and physically meaningful.
+The Graph Convolutional Network proposed by Kipf and Welling introduced an efficient method for learning from graph-structured data by aggregating information from neighboring nodes \cite{kipf2017gcn}. In the context of air quality forecasting, this means that a monitoring station can learn from its connected neighboring stations. This is useful because air pollution at one station may be affected by pollution conditions in surrounding areas.
 
-In the proposed system, edge weights will combine distance, historical pollutant correlation, wind speed, and wind direction alignment. This approach is expected to better represent directional pollutant transport than a purely distance-based graph.
+However, all neighboring stations do not contribute equally. Some stations may have stronger influence because they are closer, more polluted, or located in the direction from which wind is blowing. Graph Attention Network, proposed by Velickovic et al., addresses this issue by allowing the model to assign different attention weights to different neighboring nodes \cite{velickovic2018gat}. This makes graph attention useful for air quality forecasting because the model can learn which neighboring station is more important for a particular prediction.
 
-\section{Explainable AI in Environmental Forecasting}
-Deep learning models are often considered black boxes. For environmental decision-support systems, explainability is important because users need to understand why a model predicts high pollution in a certain area. In this project, attention weights, feature importance, and neighboring station influence will be analyzed to provide interpretable explanations.
+These graph-based approaches provide the foundation for the proposed project. Graph convolution can be used as a baseline spatial model, while graph attention can be used to learn unequal station influence. When combined with temporal models such as \gls{gru} or \gls{lstm}, these methods can support spatio-temporal air quality forecasting.
 
-GNNExplainer and related explanation methods show how graph model predictions can be interpreted by identifying important graph structures and input features \cite{ying2019gnnexplainer}. For the proposed system, explanation outputs will be compared with wind direction, distance, weather features, and pollutant history to check whether the learned relationships are physically reasonable.
+\section{Spatio-Temporal GNNs and Domain Knowledge in Air Quality Prediction}
+
+Several recent studies have shown that air quality forecasting improves when graph learning is combined with domain knowledge and temporal modeling. Wang et al. proposed PM2.5-GNN, a domain-knowledge enhanced graph neural network for PM$_{2.5}$ forecasting \cite{wang2020pm25gnn}. Their work highlights that PM$_{2.5}$ concentration is influenced by complex environmental factors and that graph-based models can capture relationships between locations more effectively than simple time-series models. This supports the idea that air quality forecasting should include not only historical pollutant values but also spatial and meteorological relationships.
+
+Pandey et al. proposed a spatial-diffusion guided encoder-decoder architecture for PM$_{2.5}$ forecasting \cite{pandey2024spatialdiffusion}. Their model combines temporal learning with graph-based spatial diffusion, showing that PM$_{2.5}$ forecasting benefits from modeling how pollution spreads across monitoring locations. This is closely related to the proposed project because the planned system also combines graph-based spatial learning with recurrent temporal learning.
+
+Panja et al. proposed E-STGCN, an extreme spatio-temporal graph convolutional network for air quality forecasting \cite{panja2024estgcn}. Their work focuses on high-pollution or extreme pollution events, which are important in public-health decision-making. Although the proposed project does not directly focus on extreme value theory, this study is useful because it shows that spatio-temporal graph models can be extended for risk-aware air quality forecasting.
+
+These studies confirm that spatio-temporal \glspl{gnn} are a strong direction for air quality prediction. However, a major limitation in many graph-based forecasting systems is that the graph structure is often fixed. A fixed graph may be created using distance or historical correlation, but real pollutant movement changes with wind and weather. This creates the need for dynamic and wind-aware graph construction.
+
+\section{Wind-Aware and Dynamic Graph Construction}
+
+The main technical idea of the proposed project is that the relationship between two air quality stations should not always remain fixed. In real atmospheric conditions, wind direction and wind speed can change throughout the day. If wind flows from one station toward another, the first station may have stronger influence on the second station. If the wind changes direction, the influence may also change. Therefore, a graph used for air quality forecasting should ideally be dynamic and wind-aware.
+
+HighAir, proposed by Chen et al., is an important reference in this direction because it uses a hierarchical graph neural network for air quality forecasting and dynamically adjusts graph edge weights based on wind direction \cite{chen2021highair}. This directly supports the proposed project's idea that wind direction should influence station-to-station relationships.
+
+Xu et al. proposed a Dynamic Graph Neural Network with Adaptive Edge Attributes for air quality prediction \cite{xu2023dynamic}. Their work argues that predefined graph structures may not always represent real relationships between monitoring sites. Instead, the model should learn or adjust edge attributes dynamically. This is important for the proposed system because the planned graph will not depend only on fixed distance. It will combine distance, historical pollutant correlation, wind direction, and wind speed to represent changing station influence.
+
+The idea of dynamic graph construction is also connected to the physical behavior of pollutants. Air pollutants spread through diffusion and can be transported by wind through advection. AirPhyNet, proposed by Hettige et al., uses physics-guided neural networks for air quality prediction and incorporates physical ideas such as diffusion and advection \cite{hettige2024airphynet}. This provides scientific support for the proposed wind-aware graph approach. Even though the proposed project may not fully implement a physics-guided differential equation model, the use of wind-based edge weighting follows the same physical intuition that pollutants move through the atmosphere rather than changing randomly.
+
+\section{Explainability in Air Quality Forecasting}
+
+Accuracy alone is not enough for an environmental decision-support system. If a model predicts that PM$_{2.5}$ will become high in a certain area, users should also understand why the model made that prediction. This is especially important in air quality forecasting because the prediction may influence public awareness, planning, and mitigation discussion.
+
+GNNExplainer, proposed by Ying et al., provides a method for explaining predictions made by graph neural networks \cite{ying2019gnnexplainer}. It identifies important parts of the graph and important node features that contribute to a prediction. In the proposed project, this idea can help identify which neighboring stations had the strongest influence on a forecasted pollution value.
+
+However, station influence is only one part of the explanation. The system should also explain the role of meteorological and pollutant features such as wind speed, wind direction, humidity, temperature, and previous PM$_{2.5}$ values. SHAP, proposed by Lundberg and Lee, provides a general approach for explaining machine-learning predictions through feature contribution values \cite{lundberg2017shap}. This can be used to show which input features contributed most to a forecast.
+
+By combining graph-based explanation and feature-level importance analysis, the proposed system can produce more meaningful outputs. Instead of only showing a forecasted PM$_{2.5}$ value, the system can explain that the prediction was influenced by rising PM$_{2.5}$ in previous hours, wind flow from a polluted neighboring station, low wind speed, or high humidity. This makes the model more understandable and useful for practical decision support.
+
+\section{Data Sources for Pollutant and Meteorological Information}
+
+The proposed system requires both air quality data and weather data. OpenAQ provides access to air quality measurements from monitoring stations and can be used to obtain pollutant data such as PM$_{2.5}$, PM$_{10}$, NO$_2$, and O$_3$ depending on station availability \cite{openaq2026measurements}. This is useful for building a reproducible data pipeline using publicly available air quality records.
+
+Meteorological data is equally important because weather strongly affects pollutant concentration and movement. Open-Meteo provides historical weather data such as temperature, humidity, pressure, wind speed, wind direction, and wind gusts \cite{openmeteo2026historical}. In the proposed project, wind speed and wind direction are especially important because they will be used to construct the wind-aware dynamic graph. Other weather variables can also help the model understand pollution accumulation and dispersion patterns.
+
+\section{Kathmandu Valley Air Quality Context}
+
+Since the project may later focus on Kathmandu Valley, it is important to understand the local air pollution context. Kathmandu Valley is a suitable case study because it has serious air pollution problems, high population density, rapid urbanization, and a valley-shaped geography that can affect pollutant accumulation. Becker et al. studied particulate matter variability in Kathmandu using in-situ measurements, remote sensing, and reanalysis data \cite{becker2020kathmandu}. Their work is useful because it shows that Kathmandu's particulate matter pollution has strong temporal variability and is affected by seasonal and meteorological conditions.
+
+Panday and Prinn studied the diurnal cycle of air pollution in Kathmandu Valley \cite{panday2009diurnal}. Their work is important because it shows that air pollution in Kathmandu changes throughout the day and is influenced by local meteorology and valley circulation. This supports the need for temporal modeling and wind-aware analysis in Kathmandu-focused air quality prediction.
+
+Clean Energy Nepal also highlights that Kathmandu Valley is vulnerable to air pollution because of its bowl-shaped topography, limited wind flow, long dry season, rapid urbanization, and major emission sources such as transport, road dust, construction, brick kilns, household energy use, and waste burning \cite{cleanenergynepalPolicyBrief}. This local context supports the motivation for developing a forecasting and visualization system for Kathmandu Valley.
+
+ICIMOD reports that Nepal approved the Kathmandu Valley Air Quality Management Action Plan in 2020 and emphasizes the need for better air quality management and decision-support mechanisms \cite{icimod2021actionplan}. This supports the practical relevance of the proposed dashboard and scenario-based analysis module. The proposed system will not replace official government warning systems, but it can serve as an academic research prototype for forecasting, explanation, visualization, and decision-support.
 
 \section{Research Gap}
-Existing air quality forecasting methods often focus either on temporal prediction or fixed spatial relationships. A practical gap remains in combining wind-aware dynamic graph construction, explainable prediction, and scenario-based mitigation analysis in one system. This project addresses the gap by integrating public air quality data, meteorological data, spatio-temporal graph learning, explanation, and an interactive dashboard.
 
-\begin{table}[H]
-    \centering
-    \small
-    \caption{Comparison of Related Approaches and Proposed System}
-    \label{tab:related_air_quality}
-    \renewcommand{\arraystretch}{1.2}
-    \setlength{\tabcolsep}{4pt}
+The reviewed literature shows that air quality forecasting has advanced significantly through deep learning and graph neural networks. Existing studies have shown that \glspl{gnn} can model relationships between monitoring locations, domain knowledge can improve PM$_{2.5}$ prediction, and spatio-temporal models can capture both time-based and location-based pollution patterns. Studies such as PM2.5-GNN, HighAir, dynamic graph neural networks with adaptive edge attributes, and AirPhyNet provide strong support for graph-based, wind-aware, and physically meaningful air quality forecasting.
 
-    \begin{tabularx}{0.94\linewidth}{|
-        >{\raggedright\arraybackslash}p{2.8cm}|
-        >{\raggedright\arraybackslash}p{4.4cm}|
-        >{\raggedright\arraybackslash}X|}
-        \hline
-        \textbf{Approach} & \textbf{Primary Focus} & \textbf{Limitation / Difference from Proposed System} \\
-        \hline
+However, several gaps still remain. First, many forecasting systems use fixed graph structures, even though pollutant movement changes with wind direction and wind speed. Second, many models focus mainly on prediction accuracy but provide limited explanation of why a certain forecast was made. Third, existing systems often do not combine forecasting, explainability, risk visualization, and scenario-based decision support into one integrated dashboard. Finally, although Kathmandu Valley has been studied in terms of particulate matter variability, diurnal pollution cycles, and policy needs, there is limited work applying explainable wind-aware spatio-temporal graph neural networks to Kathmandu Valley air quality forecasting.
 
-        Station-wise regression &
-        Forecasts pollutant concentration for each monitoring station independently. &
-        Does not capture spatial pollutant movement or influence from neighboring stations. \\
-        \hline
-
-        LSTM/GRU-based forecasting &
-        Learns temporal patterns from historical pollutant and meteorological data. &
-        Captures time dependency but may ignore station-to-station spatial influence. \\
-        \hline
-
-        Fixed-graph ST-GNN &
-        Models spatial and temporal dependencies using a predefined graph structure. &
-        Graph edges are usually static and may not adapt to changing wind speed and wind direction. \\
-        \hline
-
-        Wind-aware ST-GNN &
-        Uses distance, wind direction, wind speed, and pollutant correlation to model dynamic station influence. &
-        Provides more physically meaningful edge weighting for pollutant transport modeling. \\
-        \hline
-
-        Proposed system &
-        Combines wind-aware forecasting, explainability, risk visualization, and what-if scenario analysis. &
-        Extends forecasting results into an interpretable decision-support dashboard for air quality analysis. \\
-        \hline
-
-    \end{tabularx}
-\end{table}
+The proposed project addresses these gaps by developing an explainable wind-aware spatio-temporal graph neural network framework for air quality forecasting. The system will represent monitoring stations as graph nodes and construct dynamic edges using distance, pollutant correlation, wind speed, and wind direction. It will combine graph-based spatial learning with temporal models such as \gls{gru} or \gls{lstm} to forecast pollutant concentration. It will also include an explainability module to identify influential stations and important weather features. Finally, the results will be shown through an interactive dashboard for air quality visualization, risk analysis, and what-if scenario-based decision support.
