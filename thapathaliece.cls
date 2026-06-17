@@ -290,7 +290,7 @@
 % ============================================================
 \renewcommand\thefigure{\thechapter-\arabic{figure}}
 \renewcommand\thetable{\thechapter-\arabic{table}}
-\renewcommand{\theequation}{\thechapter-\arabic{equation}}
+\renewcommand{\theequation}{\thechapter.\arabic{equation}}
 
 % ============================================================
 % CODE LISTING STYLE
