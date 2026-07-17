@@ -1,11 +1,10 @@
 \chapter{METHODOLOGY}
 
 \section{System Block Diagram/Architecture}
-The proposed system is organized into data collection, preprocessing, wind-aware dynamic graph construction, spatio-temporal forecasting, explainability, storage, backend service, and dashboard layers. \Cref{fig:sys_diagram} shows the complete system architecture and how the components interact.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{src/images/figures/sys_diagram.jpg}
+    \includegraphics[width=\textwidth]{src/images/figures/sys_diagram.png}
     \caption{System Block Diagram}
     \label{fig:sys_diagram}
 \end{figure}
@@ -82,9 +81,9 @@ In \Cref{tab:integrated_dataset_sample}, PM$_{2.5}$ and PM$_1$ concentrations ar
 
 The proposed model will use hourly air quality and meteorological observations from multiple monitoring stations. Let $N$ represent the number of monitoring stations and $F$ represent the number of input features. At each time step $t$, the observations are represented as a node feature matrix:
 
-\[
+\begin{equation}
 X_t \in \mathbb{R}^{N \times F}
-\]
+\end{equation}
 
 where each row represents a monitoring station and each column represents a pollutant, meteorological, or temporal feature.
 
@@ -94,15 +93,15 @@ The main input variables will include PM$_{2.5}$, PM$_1$, temperature, humidity,
 
 The primary prediction target is future PM$_{2.5}$ concentration at each monitoring station. For station $i$ and forecasting horizon $h$, the target value is represented as:
 
-\[
+\begin{equation}
 y_i^{(t+h)}
-\]
+\end{equation}
 
 and the model prediction is represented as:
 
-\[
+\begin{equation}
 \hat{y}_i^{(t+h)}
-\]
+\end{equation}
 
 Therefore, the task is formulated as a regression problem, where the model learns to minimize the difference between actual and predicted PM$_{2.5}$ values across all stations and time steps. Although the model predicts numerical PM$_{2.5}$ values, air quality categories such as good, moderate, unhealthy, and hazardous will be generated later in the post-processing stage using standard AQI threshold values.
 
@@ -118,9 +117,9 @@ Environmental monitoring data may contain abnormal values caused by sensor malfu
 
 The collected variables have different numerical ranges and units. To ensure stable neural network training, all numerical features are normalized before being supplied to the forecasting model. Min-Max normalization is applied to transform each feature into a common numerical range between 0 and 1. The normalized value of each feature is computed as:
 
-\[
+\begin{equation}
 X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}
-\]
+\end{equation}
 
 where $X$ represents the original feature value, $X_{min}$ is the minimum observed value, and $X_{max}$ is the maximum observed value within the training dataset.
 
@@ -134,47 +133,47 @@ The proposed system models air quality monitoring stations as a dynamic graph in
 
 Let the air quality monitoring network be defined as a graph:
 
-\[
+\begin{equation}
 G_t = (V, E_t, A_t)
-\]
+\end{equation}
 
 where $V$ represents the set of monitoring stations, $E_t$ represents the set of edges at time $t$, and $A_t$ represents the adjacency matrix at time $t$. Each node $v_i \in V$ corresponds to a monitoring station and is associated with a feature vector:
 
-\[
+\begin{equation}
 X_i^t = [PM_{2.5}, PM_1, Temperature, Humidity, WindSpeed, WindDirection]
-\]
+\end{equation}
 
 An edge between two stations $i$ and $j$ is defined based on geographical distance, historical pollutant correlation, wind speed, and wind direction alignment. Thus, the edge weight is defined as a composite function:
 
-\[
+\begin{equation}
 A_{ij}^t = f_d(i,j) \cdot f_c(i,j) \cdot f_w(i,j,t)
-\]
+\end{equation}
 
 Spatial proximity between stations is modeled using normalized inverse distance:
 
-\[
+\begin{equation}
 f_d(i,j) = \exp\left(-\frac{d_{ij}}{\sigma_d}\right)
-\]
+\end{equation}
 
 where $d_{ij}$ is the geographical distance between stations $i$ and $j$, and $\sigma_d$ is a scaling parameter controlling spatial decay.
 
 To capture long-term similarity in pollution patterns, historical correlation is computed as:
 
-\[
+\begin{equation}
 f_c(i,j) = \operatorname{corr}(PM2.5_i, PM2.5_j)
-\]
+\end{equation}
 
 The key contribution of the proposed system is the incorporation of wind-driven pollutant transport. Wind influence is modeled as:
 
-\[
+\begin{equation}
 f_w(i,j,t) = \alpha \cdot \cos(\theta_{ij} - \theta_t) \cdot WS_t
-\]
+\end{equation}
 
 where $\theta_{ij}$ is the direction from station $i$ to station $j$, $\theta_t$ is the wind direction at time $t$, $WS_t$ is the wind speed at time $t$, and $\alpha$ is a scaling factor. This formulation increases influence when wind flows from one station toward another, decreases influence when wind flows in the opposite direction, and amplifies spatial propagation effects during stronger wind conditions.
 
 The final adjacency matrix is time-dependent and is updated at every time step to reflect changing meteorological conditions:
 
-\[
+\begin{equation}
 A_t =
 \begin{bmatrix}
 A_{11}^t & A_{12}^t & \cdots & A_{1n}^t \\
@@ -182,7 +181,7 @@ A_{21}^t & A_{22}^t & \cdots & A_{2n}^t \\
 \vdots & \vdots & \ddots & \vdots \\
 A_{n1}^t & A_{n2}^t & \cdots & A_{nn}^t
 \end{bmatrix}
-\]
+\end{equation}
 
 The output of this module is the dynamic adjacency matrix $A_t$, the node feature matrix $X_t$, and the edge-weighted graph representation $G_t$. These outputs are subsequently used as input to the graph attention layer for spatial feature learning.
 
@@ -194,9 +193,9 @@ A virtual node represents an unmonitored geographic location selected from the m
 
 Formally, if there are $N$ real monitoring stations and $V$ virtual nodes, the graph is expanded as:
 
-\[
+\begin{equation}
 N' = N + V
-\]
+\end{equation}
 
 where $N'$ is the total number of real and virtual nodes in the graph. The model then performs prediction over both physical monitoring stations and virtual nodes.
 
@@ -212,50 +211,50 @@ In addition to forecasting PM$_{2.5}$ at physical monitoring stations, the model
 
 At each time step $t$, the model receives a node feature matrix:
 
-\[
+\begin{equation}
 X_t \in \mathbb{R}^{N \times F}
-\]
+\end{equation}
 
 and a dynamic adjacency matrix:
 
-\[
+\begin{equation}
 A_t \in \mathbb{R}^{N \times N}
-\]
+\end{equation}
 
 where $N$ represents the number of monitoring stations and $F$ represents the number of input features per station. The adjacency matrix is generated from the wind-aware graph using factors such as geographical distance, wind direction, wind speed, and pollutant similarity.
 
 The Graph Attention Network captures spatial influence between monitoring stations. For each station $i$, the GAT layer aggregates information from neighboring stations using attention weights:
 
-\[
+\begin{equation}
 h_i^t = \sigma \left( \sum_{j \in \mathcal{N}(i)} \alpha_{ij}^t W x_j^t \right)
-\]
+\end{equation}
 
 where $x_j^t$ is the feature vector of neighboring station $j$, $W$ is a learnable weight matrix, $\alpha_{ij}^t$ is the attention coefficient, $\mathcal{N}(i)$ represents the neighboring stations of station $i$, and $\sigma$ is a non-linear activation function. The attention coefficient $\alpha_{ij}^t$ shows how much influence station $j$ has on station $i$ at time $t$. This also supports model explainability because the learned attention weights can help identify which nearby stations contribute most to a prediction.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.92\textwidth]{src/images/figures/spatial_modeling.jpg}
+    \includegraphics[width=0.92\textwidth]{src/images/figures/spatial_modeling.png}
     \caption{Spatial modeling using graph attention}
     \label{fig:spatial_modeling}
 \end{figure}
 
 The spatial output of the GAT layer is represented as:
 
-\[
+\begin{equation}
 H_t = GAT(X_t, A_t)
-\]
+\end{equation}
 
 To capture temporal dependencies, the spatial embeddings from multiple previous time steps are passed into a GRU network. For an input window of length $L$, the GRU processes:
 
-\[
+\begin{equation}
 H_{t-L+1:t}
-\]
+\end{equation}
 
 The hidden state is updated as:
 
-\[
+\begin{equation}
 z_t = GRU(H_t, z_{t-1})
-\]
+\end{equation}
 
 where $H_t$ is the spatial embedding at time $t$, and $z_t$ is the hidden state that captures temporal evolution. This allows the model to learn short-term pollution changes, delayed meteorological effects, and temporal persistence in PM$_{2.5}$ concentration.
 
@@ -268,9 +267,9 @@ where $H_t$ is the spatial embedding at time $t$, and $z_t$ is the hidden state 
 
 The final hidden representation from the GRU is passed through a fully connected regression layer to predict future PM$_{2.5}$ concentration at each station:
 
-\[
+\begin{equation}
 \hat{y}_{t+h} = W_o z_t + b
-\]
+\end{equation}
 
 where $\hat{y}_{t+h}$ is the predicted PM$_{2.5}$ concentration after horizon $h$, and $h \in \{1, 6, 12, 24\}$. The one-hour horizon represents the single-step forecasting case, while 6, 12, and 24-hour horizons are used for multi-horizon forecasting. The overall architecture can be summarized as input features, wind-aware graph construction, GAT layer, GRU layer, and regression output.
 
@@ -288,7 +287,7 @@ The explainability outputs will be presented through visualizations such as stat
 
 \clearpage
 \begin{samepage}
-\section{Flowchart}
+\section{Flow Diagram}
 \Cref{fig:air_quality_flowchart} presents the overall workflow from data collection to dashboard visualization.
 
 \begin{figure}[H]
@@ -386,52 +385,52 @@ The project will evaluate forecasting models using regression metrics and horizo
 
 Mean Absolute Error (MAE) measures the average absolute prediction error in PM$_{2.5}$ values:
 
-\[
+\begin{equation}
 MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
-\]
+\end{equation}
 
 Root Mean Squared Error (RMSE) penalizes large errors more strongly and is useful for evaluating pollution spikes:
 
-\[
+\begin{equation}
 RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
-\]
+\end{equation}
 
 Mean Absolute Percentage Error (MAPE) measures prediction error in percentage form:
 
-\[
+\begin{equation}
 MAPE = \frac{1}{n} \sum_{i=1}^{n} \left|\frac{y_i - \hat{y}_i}{y_i}\right| \times 100
-\]
+\end{equation}
 
 The $R^2$ score shows how well the model explains variation in PM$_{2.5}$ concentration:
 
-\[
+\begin{equation}
 R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
-\]
+\end{equation}
 
 Bias indicates whether the model generally overpredicts or underpredicts:
 
-\[
+\begin{equation}
 Bias = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)
-\]
+\end{equation}
 
 \subsection{Peak Metrics}
 
 Peak-event metrics will be used to evaluate whether the system can identify high-pollution events. Precision measures how many predicted pollution events were actually correct:
 
-\[
+\begin{equation}
 Precision = \frac{TP}{TP + FP}
-\]
+\end{equation}
 
 Recall, also known as probability of detection, measures how many actual pollution events were correctly detected:
 
-\[
+\begin{equation}
 Recall = \frac{TP}{TP + FN}
-\]
+\end{equation}
 
 The F1 score balances precision and recall for event detection performance:
 
-\[
+\begin{equation}
 F1 = \frac{2 \cdot Precision \cdot Recall}{Precision + Recall}
-\]
+\end{equation}
 
 Explainability will be assessed qualitatively by inspecting whether important stations, weather factors, and time windows are consistent with wind direction, distance, and pollutant history. The dashboard will be evaluated based on whether it can clearly present forecasts, AQI categories, spatial maps, explanation visualizations, and what-if scenario comparisons.
