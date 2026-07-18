@@ -1,4 +1,64 @@
-\chapter{REMAINING TASKS}
+\chapter{REMAINING TASK}
+\label{chap:remaining_tasks}
 
-\noindent\textbf{CHAPTER GUIDE:} Purpose: describe unfinished work, risks, and a realistic plan. Must include: What is completed vs pending, Remaining milestones, Risks/blockers + mitigation. LaTeX: Use itemize for checklists; enumerate for ordered milestones.
+This chapter lists the remaining work required to complete the project after the mid-term stage. The remaining tasks focus on implementation, experimentation, analysis, dashboard integration, and final documentation.
 
+\section{Completed Work}
+
+The following tasks have been completed or substantially completed:
+
+\begin{itemize}
+    \item Project topic, problem definition, objectives, scope, and applications have been finalized.
+    \item Literature review has been prepared for air quality forecasting, graph neural networks, wind-aware graph construction, virtual nodes, and explainability.
+    \item Functional, non-functional, hardware, and software requirements have been defined.
+    \item System architecture and methodology have been designed.
+    \item Dataset sources, input variables, forecasting target, and evaluation metrics have been identified.
+    \item The wind-aware graph formulation and GAT-GRU model structure have been prepared.
+\end{itemize}
+
+\section{Pending Work}
+
+The following tasks remain for the next phase:
+
+\begin{enumerate}
+    \item Complete data collection and station-wise data validation.
+    \item Implement the preprocessing pipeline for timestamp alignment, missing-value handling, outlier treatment, normalization, and sliding-window generation.
+    \item Implement the wind-aware dynamic graph construction module.
+    \item Train and evaluate baseline models.
+    \item Implement, train, and tune the GAT-GRU forecasting model.
+    \item Validate virtual-node estimation using leave-one-station-out testing.
+    \item Generate explainability outputs using attention weights, feature importance, and temporal sensitivity analysis.
+    \item Develop backend API endpoints for forecasts, AQI categories, maps, and explanation outputs.
+    \item Develop and test the frontend dashboard.
+    \item Prepare final result tables, graphs, comparison analysis, limitations, and conclusion.
+\end{enumerate}
+
+\section{Risks and Mitigation}
+
+The major remaining risks are data gaps, model complexity, limited training time, and dashboard integration delays. These risks will be mitigated by using selected stations with usable data coverage, implementing simple baselines first, keeping the GAT-GRU model modular, using optional cloud GPU resources only when needed, and integrating the dashboard incrementally.
+
+\section{Remaining Milestones}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Remaining Project Milestones}
+    \label{tab:remaining_milestones}
+    \begin{tabularx}{0.94\linewidth}{|p{3.6cm}|X|}
+        \hline
+        \textbf{Milestone} & \textbf{Expected Output} \\
+        \hline
+        Data and preprocessing completion & Cleaned station-wise dataset and model-ready input windows \\
+        \hline
+        Model implementation & Baseline models and GAT-GRU forecasting model \\
+        \hline
+        Evaluation & Quantitative error metrics, horizon-wise comparison, and peak-event analysis \\
+        \hline
+        Explainability & Station influence maps, feature-importance plots, and temporal analysis \\
+        \hline
+        Dashboard integration & Web dashboard with forecast, AQI, spatial, and explanation views \\
+        \hline
+        Final documentation & Final project report, presentation, and demonstration materials \\
+        \hline
+    \end{tabularx}
+\end{table}

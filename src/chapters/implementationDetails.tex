@@ -1,6 +1,76 @@
 \chapter{IMPLEMENTATION DETAILS}
-Note: This begining of this chapter should be mid-point of your entire rport content. 
-The implementation detials and result part should approximately be 50-60\% of total content.
-Describe how design was translated to working system with sufficient detail for replication.
-Some relevant sections might be given below. You can heavilty customize based on your project type. 
+\label{chap:implementation}
 
+This chapter describes the implementation work completed by the mid-term stage and the technical plan being followed for the remaining implementation. The project is implemented as a modular software system consisting of data ingestion, preprocessing, graph construction, forecasting, explainability, backend API, and dashboard modules.
+
+\section{Implementation Status}
+
+The initial project phase established the problem definition, objectives, literature review, feasibility, and expected outcomes. During the mid-term phase, the work has progressed toward the technical design and implementation structure. The current implementation status is summarized in \cref{tab:implementation_status}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Mid-Term Implementation Status}
+    \label{tab:implementation_status}
+    \begin{tabularx}{0.94\linewidth}{|p{4cm}|X|p{2.5cm}|}
+        \hline
+        \textbf{Module} & \textbf{Work Completed} & \textbf{Status} \\
+        \hline
+        Literature and requirement analysis & Reviewed spatio-temporal forecasting, GNN, wind-aware graph, explainability, and Kathmandu Valley air quality studies & Completed \\
+        \hline
+        Dataset planning & Identified pollutant and meteorological variables, candidate stations, timestamp resolution, and target forecasting horizons & Completed \\
+        \hline
+        Preprocessing design & Defined timestamp alignment, missing-value handling, outlier treatment, scaling, and sliding-window generation & In progress \\
+        \hline
+        Wind-aware graph design & Formulated dynamic adjacency using distance, PM$_{2.5}$ correlation, wind direction, and wind speed & In progress \\
+        \hline
+        Forecasting model & Designed GAT-GRU model structure and baseline comparison plan & In progress \\
+        \hline
+        Dashboard & Planned station-level, map-based, time-series, AQI, and explainability views & Pending \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Data Preparation Module}
+
+The data preparation module converts raw pollutant and weather records into a synchronized dataset suitable for graph-based forecasting. PM$_{2.5}$ is used as the primary target variable, while PM$_1$, temperature, humidity, wind speed, wind direction, pressure, dew point, hour of day, day of week, month, and season are considered as input features.
+
+Records from different stations are aligned at an hourly interval. Short missing gaps are handled using interpolation, while long missing segments are removed if they would reduce reliability. Wind direction is converted into sine and cosine components to avoid discontinuity between 359 degrees and 0 degrees. Numerical features are normalized using training-set statistics to prevent data leakage.
+
+\section{Graph Construction Module}
+
+The graph construction module represents each physical monitoring station as a node. The edge weight between two stations is computed using spatial and meteorological information. A higher edge weight is assigned when two stations are geographically close, historically correlated, and aligned with the wind direction. This design allows the graph to change over time as wind direction and wind speed change.
+
+The dynamic graph at time $t$ is represented as:
+
+\begin{equation}
+G_t = (V, E_t, A_t)
+\end{equation}
+
+where $V$ is the station set, $E_t$ is the time-dependent edge set, and $A_t$ is the weighted adjacency matrix. The graph construction output is passed to the GAT layer for spatial representation learning.
+
+\section{Forecasting Model Module}
+
+The primary model combines Graph Attention Network and Gated Recurrent Unit components. The GAT layer learns spatial relationships between stations, while the GRU layer learns temporal changes in pollution concentration. The model receives a sequence of graph-structured observations and predicts PM$_{2.5}$ at a future horizon.
+
+The forecasting module will be compared with baseline models. The baseline set includes a persistence model, traditional regression models, and a GRU-only model. This comparison is necessary to verify whether the wind-aware graph and attention mechanism improve forecasting performance.
+
+\section{Virtual Node Module}
+
+Virtual nodes are included to estimate PM$_{2.5}$ concentration at unmonitored locations. A virtual node is connected to nearby real stations using distance and wind-aware edge weights. Since virtual nodes do not have direct sensor readings, their input features are estimated from surrounding stations and meteorological conditions.
+
+The planned validation approach is leave-one-station-out testing. In this method, one physical station is temporarily treated as an unmonitored location, and the predicted value is compared with the actual observation from that station.
+
+\section{Explainability Module}
+
+The explanation module will generate three types of interpretation:
+
+\begin{itemize}
+    \item \textbf{Spatial explanation:} GAT attention weights will show which neighboring stations influenced a target station or virtual node.
+    \item \textbf{Feature explanation:} SHAP or similar feature attribution methods will show the contribution of PM$_{2.5}$ history, wind speed, wind direction, humidity, temperature, and temporal features.
+    \item \textbf{Temporal explanation:} Sensitivity across look-back windows will show whether recent hours or earlier patterns had stronger influence on the forecast.
+\end{itemize}
+
+\section{Dashboard Module}
+
+The dashboard is planned as the user-facing component of the project. It will include station-wise PM$_{2.5}$ forecasts, AQI categories, historical-versus-predicted plots, spatial maps, virtual-node estimates, and explanation charts. A backend API will serve processed data, model outputs, and explanation results to the frontend.

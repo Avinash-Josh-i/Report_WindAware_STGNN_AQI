@@ -1,16 +1,82 @@
 \chapter{RESULTS AND ANALYSIS}
+\label{chap:results}
 
-%  WRITING GUIDELINES FOR RESULTS AND ANALYSIS CHAPTER
-%  ====================================================
-The Results and Analysis chapter presents the outcomes of your project and critically analyzes
-them. This chapter demonstrates whether your system meets requirements, compares performance
-against objectives and baselines, and interprets findings. Results should be presented objectively
-with appropriate visualizations, while analysis provides context and explanation. This chapter should be full of charts, tables, and figures illustrating your system's performance and behaviour.
+This chapter presents the results available at the mid-term stage and analyzes the progress against the project objectives. Since the complete model training and dashboard integration are scheduled for the next phase, the current results focus on completed design outputs, dataset organization, architecture readiness, and implementation progress.
 
+\section{Requirement and Design Results}
 
-%  LaTeX quick refs:
-\begin{itemize}
-    \item Always reference figures and tables in the text before they appear.
-    \item Use the cleveref package; write \verb|\cref{fig:label}| or \verb|\Cref{tab:label}| for automatic formatting (add \verb|\usepackage{cleveref}| to the preamble).
-    \item Keep captions descriptive and use unique labels per chapter (e.g., \texttt{fig:my-figure}, \texttt{tab:results}).
-\end{itemize}
+The first major result of the project is a clear technical requirement specification for the forecasting system. The system has been divided into data preparation, graph construction, forecasting, explainability, backend, and dashboard modules. This modular design helps reduce implementation complexity and makes evaluation easier.
+
+The second major result is the finalized system architecture. The architecture connects pollutant data, meteorological data, wind-aware graph construction, GAT-GRU forecasting, explainability, and dashboard visualization. This design satisfies the original objective of combining spatial, temporal, wind-aware, and explainable modeling components.
+
+\section{Dataset Preparation Results}
+
+The required dataset structure has been identified. PM$_{2.5}$ is selected as the main forecasting target, while PM$_1$, temperature, humidity, wind speed, wind direction, pressure, dew point, and temporal features are selected as input variables. The data will be organized as hourly station-wise records. A model-ready sample structure is shown in \cref{tab:midterm_dataset_structure}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Model-Ready Dataset Structure}
+    \label{tab:midterm_dataset_structure}
+    \begin{tabularx}{0.94\linewidth}{|p{3.2cm}|X|}
+        \hline
+        \textbf{Field} & \textbf{Purpose} \\
+        \hline
+        Timestamp & Aligns all pollutant and meteorological readings at hourly resolution \\
+        \hline
+        Station ID and coordinates & Identifies each graph node and supports distance calculation \\
+        \hline
+        PM$_{2.5}$ & Main prediction target and historical input feature \\
+        \hline
+        Meteorological variables & Captures weather influence on pollutant concentration and transport \\
+        \hline
+        Wind direction and wind speed & Builds wind-aware dynamic graph edges \\
+        \hline
+        Temporal variables & Captures daily, weekly, and seasonal patterns \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Architecture Analysis}
+
+The proposed architecture is suitable for the project because it addresses the main limitations identified in the literature review. Station-wise models can learn temporal patterns but cannot fully capture pollutant movement between stations. Static graph models can capture spatial relationships but may not adapt to changing wind conditions. The proposed dynamic graph combines distance, historical correlation, wind speed, and wind-direction alignment, making it more suitable for a valley-based air quality forecasting problem.
+
+The GAT-GRU architecture is also appropriate because GAT can learn unequal influence from neighboring stations and GRU can model temporal dependency. The attention values produced by GAT can be reused as part of the explainability module, which supports the objective of producing interpretable forecasts.
+
+\section{Mid-Term Progress Analysis}
+
+\Cref{tab:midterm_progress} summarizes the progress of the project at the mid-term stage.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Progress Analysis at Mid-Term Stage}
+    \label{tab:midterm_progress}
+    \begin{tabularx}{0.94\linewidth}{|p{4cm}|X|p{2.2cm}|}
+        \hline
+        \textbf{Work Package} & \textbf{Analysis} & \textbf{Progress} \\
+        \hline
+        Literature review & Relevant work on GNN, GAT, dynamic graphs, explainability, and Kathmandu Valley air quality has been reviewed and linked to the project gap & Complete \\
+        \hline
+        Requirement analysis & Functional, non-functional, hardware, software, and feasibility requirements have been defined & Complete \\
+        \hline
+        System architecture & Major system blocks and data flow have been finalized & Complete \\
+        \hline
+        Preprocessing pipeline & Data cleaning and synchronization steps have been designed and are being implemented & Partial \\
+        \hline
+        Model implementation & GAT-GRU model structure and baseline comparison plan have been prepared & Partial \\
+        \hline
+        Evaluation and dashboard & Quantitative results, explainability outputs, virtual-node validation, and dashboard integration remain for the second phase & Pending \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Expected Evaluation Outputs}
+
+The final evaluation will include MAE, RMSE, MAPE, $R^2$, bias, and peak-event metrics. Results will be presented horizon-wise and station-wise. The proposed model will be compared against baseline models to determine whether wind-aware graph construction improves forecast accuracy.
+
+The dashboard result will be evaluated based on whether it can display forecast values, AQI categories, station maps, virtual-node estimates, and explanation outputs clearly. Since the project is a research prototype, the final analysis will focus on both prediction accuracy and interpretability.
+
+\section{Discussion}
+
+The project is progressing according to the mid-term expectations. The problem scope has been made specific to PM$_{2.5}$ forecasting in Kathmandu Valley, and the system design is aligned with the project objectives. The most important remaining challenge is to convert the designed modules into tested implementation outputs and generate quantitative results. Model evaluation and dashboard integration will therefore receive the highest priority in the next phase.

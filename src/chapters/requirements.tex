@@ -1,43 +1,106 @@
-\chapter{REQUIREMENTS ANALYSIS}
+\chapter{REQUIREMENT ANALYSIS}
 \label{chap:requirements}
 
-CHAPTER GUIDE:
-Purpose: specify what the system must do (FRs) and how well (NFRs)
-Must include: Functional requirements, Non-functional requirements, System requirements
-LaTeX: use tables with caption and label, reference with Table ref
-
-This chapter specifies what the system must do (functional requirements) and how well it must do it (non-functional requirements). Hardware and software requirements belong here as \emph{system requirements} (i.e., what platform/environment is needed to build and run the system), while the next chapter (System Architecture and Methodology) should explain \emph{how} you will implement and validate these requirements.
+This chapter describes the functional, non-functional, hardware, software, and feasibility requirements of the proposed explainable wind-aware spatio-temporal graph neural network system. Since the project is a software-based research prototype, the major requirements are related to data availability, model development, evaluation, explainability, and dashboard visualization.
 
 \section{Functional Requirements}
-List functional requirements using a consistent, testable format (e.g., IEEE 830 / “shall” statements).
+
+The system must support the complete workflow from data preparation to visualization. The major functional requirements are listed below:
 
 \begin{enumerate}
-    \item \textbf{FR-001:} The system shall \emph{[describe capability]}.
-    \item \textbf{FR-002:} The system shall \emph{[describe capability]}.
+    \item \textbf{FR-001: Data collection and integration:} The system shall collect or import PM$_{2.5}$ observations from selected Kathmandu Valley monitoring stations and combine them with meteorological variables such as wind speed, wind direction, temperature, humidity, pressure, and dew point.
+    \item \textbf{FR-002: Data preprocessing:} The system shall clean missing values, align station records by timestamp, remove invalid observations, normalize numerical features, and generate model-ready temporal windows.
+    \item \textbf{FR-003: Wind-aware graph construction:} The system shall represent air quality stations as graph nodes and create dynamic edges using geographical distance, PM$_{2.5}$ correlation, wind speed, and wind-direction alignment.
+    \item \textbf{FR-004: Forecasting:} The system shall forecast future PM$_{2.5}$ concentration for selected monitoring stations at a primary horizon of 6 hours, with additional horizons used for comparison where possible.
+    \item \textbf{FR-005: Baseline comparison:} The system shall compare the proposed GAT-GRU model with baseline models such as persistence, regression-based models, and GRU.
+    \item \textbf{FR-006: Virtual-node estimation:} The system shall estimate PM$_{2.5}$ concentration at selected unmonitored locations by representing them as virtual nodes in the graph.
+    \item \textbf{FR-007: Explainability:} The system shall provide interpretable outputs such as station influence, feature importance, and temporal importance to explain model predictions.
+    \item \textbf{FR-008: Dashboard visualization:} The system shall display forecasts, AQI categories, station-wise trends, spatial maps, virtual-node outputs, and explanation charts through a web dashboard.
 \end{enumerate}
 
 \section{Non-Functional Requirements}
-Capture performance, reliability, usability, maintainability, portability, and security constraints.
+
+The non-functional requirements define how well the system should perform and how it should behave during use.
 
 \begin{enumerate}
-    \item \textbf{NFR-001 (Performance):} The system shall \emph{[state measurable latency/throughput target]}.
-    \item \textbf{NFR-002 (Reliability):} The system shall \emph{[state uptime/robustness target]}.
+    \item \textbf{NFR-001 (Accuracy):} The forecasting model should achieve lower MAE and RMSE than simple baseline models on the selected test dataset.
+    \item \textbf{NFR-002 (Usability):} The dashboard should present forecasts, maps, and explanations in a clear form suitable for academic demonstration and air quality interpretation.
+    \item \textbf{NFR-003 (Maintainability):} The codebase should be modular, separating data preprocessing, graph construction, model training, evaluation, explanation, backend service, and frontend visualization.
+    \item \textbf{NFR-004 (Scalability):} The system should allow additional stations, features, and forecasting horizons to be added without major redesign.
+    \item \textbf{NFR-005 (Reproducibility):} Experiments should use documented preprocessing steps, saved configuration values, and consistent train-validation-test splits.
+    \item \textbf{NFR-006 (Performance):} The trained model should generate forecasts fast enough for dashboard demonstration on a local or modest cloud environment.
 \end{enumerate}
 
-\section{System Requirements }
-This section has answers for “what machine + what software stack is required to build/run the project?”
+\section{Project Requirements}
 
 \subsection{Hardware Requirements}
-\begin{itemize}
-    \item \textbf{Minimum:} 64-bit CPU, 8 GB RAM, 5 GB free disk space.
-    \item \textbf{Recommended:} 4+ core CPU, 16 GB RAM, SSD storage.
-    \item \textbf{Optional (ML/large experiments):} Dedicated GPU with supported drivers and sufficient VRAM.
-\end{itemize}
+
+The project does not require special sensing hardware because it uses available air quality and meteorological datasets. The development and experimentation requirements are listed in \cref{tab:hardware_requirements}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Hardware Requirements}
+    \label{tab:hardware_requirements}
+    \begin{tabularx}{0.94\linewidth}{|p{4cm}|X|}
+        \hline
+        \textbf{Component} & \textbf{Requirement} \\
+        \hline
+        Processor & 64-bit multi-core processor for preprocessing, training, and dashboard development \\
+        \hline
+        Memory & Minimum 8 GB RAM; 16 GB or higher recommended for model experimentation \\
+        \hline
+        Storage & At least 10 GB free storage for datasets, trained models, reports, and experiment logs \\
+        \hline
+        GPU & Optional GPU through local hardware, Google Colab, Kaggle, or another cloud environment for faster training \\
+        \hline
+        Internet & Required for dataset access, API use, dependency installation, and research review \\
+        \hline
+    \end{tabularx}
+\end{table}
 
 \subsection{Software Requirements}
-\begin{itemize}
-    \item Operating system: Windows / Linux / macOS (specify your target).
-    \item Build tools: \emph{[e.g., GCC, CMake, Maven, etc.]}.
-    \item Project runtime/development stack: \emph{[e.g., Python 3.x + required libraries, database, web framework]}.\newline
-          (Replace this line with the exact stack used in your implementation.)
-\end{itemize}
+
+The software requirements are listed in \cref{tab:software_requirements}. These tools support data processing, graph modeling, deep learning, explainability, API development, and dashboard visualization.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Software Requirements}
+    \label{tab:software_requirements}
+    \begin{tabularx}{0.94\linewidth}{|p{4cm}|X|}
+        \hline
+        \textbf{Category} & \textbf{Tools and Libraries} \\
+        \hline
+        Programming language & Python 3.x, JavaScript or TypeScript \\
+        \hline
+        Data processing & pandas, NumPy, scikit-learn \\
+        \hline
+        Deep learning & PyTorch, PyTorch Geometric \\
+        \hline
+        Explainability & SHAP, attention-weight visualization, feature-importance analysis \\
+        \hline
+        Data sources & OpenAQ API or downloaded OpenAQ data, Open-Meteo historical weather API \\
+        \hline
+        Backend & FastAPI and REST API endpoints \\
+        \hline
+        Frontend & React, Leaflet or Mapbox, charting library such as Recharts \\
+        \hline
+        Documentation & LaTeX, BibTeX, Git \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Feasibility Study}
+
+\subsection{Technical Feasibility}
+
+The project is technically feasible because the required datasets, algorithms, and tools are available. PM$_{2.5}$ records can be obtained from air quality monitoring data sources, while meteorological features can be obtained from Open-Meteo. The forecasting model can be implemented using established graph neural network and recurrent neural network libraries.
+
+\subsection{Economic Feasibility}
+
+The project is economically feasible because most required tools are free and open source. The major costs are related to internet access, optional cloud compute, printing, and report binding. A detailed project budget is included in Appendix A.
+
+\subsection{Schedule Feasibility}
+
+The project can be completed within the academic timeline by following a phased workflow. Literature review, system design, requirement analysis, and graph formulation have been completed during the first phase. Model implementation, result evaluation, explainability, dashboard integration, and final documentation remain for the next phase. The project timeline is included in Appendix B.
