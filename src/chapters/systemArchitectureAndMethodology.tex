@@ -413,24 +413,5 @@ Bias indicates whether the model generally overpredicts or underpredicts:
 Bias = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)
 \end{equation}
 
-\subsection{Peak Metrics}
-
-Peak-event metrics will be used to evaluate whether the system can identify high-pollution events. Precision measures how many predicted pollution events were actually correct:
-
-\begin{equation}
-Precision = \frac{TP}{TP + FP}
-\end{equation}
-
-Recall, also known as probability of detection, measures how many actual pollution events were correctly detected:
-
-\begin{equation}
-Recall = \frac{TP}{TP + FN}
-\end{equation}
-
-The F1 score balances precision and recall for event detection performance:
-
-\begin{equation}
-F1 = \frac{2 \cdot Precision \cdot Recall}{Precision + Recall}
-\end{equation}
 
 Explainability will be assessed qualitatively by inspecting whether important stations, weather factors, and time windows are consistent with wind direction, distance, and pollutant history. The dashboard will be evaluated based on whether it can clearly present forecasts, AQI categories, spatial maps, explanation visualizations, and what-if scenario comparisons.
