@@ -18,8 +18,8 @@ This repository is a LaTeX template for **major/minor project** proposal, progre
 
 ### Commands
 From the project root:
-- Clean: `latexmk -C main.tex`
-- Build PDF: `latexmk -pdf main.tex`
+latexmk -C windaware_stgnn_for_AQI_prediction.tex
+latexmk -pdf windaware_stgnn_for_AQI_prediction.tex
 
 Tip: If you build into the `build/` folder, use `latexmk -pdf -outdir=build main.tex`.
 
