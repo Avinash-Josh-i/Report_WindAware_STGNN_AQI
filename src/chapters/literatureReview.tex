@@ -12,7 +12,7 @@ Together, \cite{ref1} and \cite{ref2} indicate that ground stations should provi
 
 \subsection{Seasonal, Diurnal, and Meteorological Controls}
 
-Kathmandu studies consistently identify nonlinear and lagged meteorological effects. Shrestha's generalized models explained approximately 79\%-85\% of observed variation and found significant effects of temperature, rainfall, humidity, and wind; a 1 m/s wind-speed increase was associated with an estimated 7.3\% reduction in PM$_{10}$ \cite{ref5}. Although multiple particle sizes were analyzed, the results support pollutant-specific meteorological modeling.
+Kathmandu studies consistently identify nonlinear and lagged meteorological effects. Shrestha's generalized models explained approximately 79\%-85\% of observed variation and found significant effects of temperature, rainfall, humidity, and wind \cite{ref5}. Although multiple particle sizes were analyzed, the results support pollutant-specific meteorological modeling.
 
 Telee et al. found winter and pre-monsoon PM$_{2.5}$ peaks at Ratna Park, negative associations with minimum temperature and precipitation, and a regression model explaining 68\% of variance \cite{ref8}. The authors also noted unmeasured source effects, showing that meteorology modulates pollution but cannot replace information about local and transported emissions.
 
@@ -125,7 +125,7 @@ Physics guidance offers three potential advantages for the present project: it c
 
 \subsection{Regional Interpolation and Fine-Grained Surface Prediction}
 
-Several selected studies convert sparse station observations into regional surfaces before or during prediction. SwinLSTM-Kriging interpolates meteorological and pollutant indicators from 29 stations into two-dimensional regional fields and then predicts PM$_{2.5}$ and PM$_{10}$ for 1-, 6-, and 24-hour horizons. The proposed SwinLSTM improved average $R^2$ by approximately 5\% over ConvLSTM \cite{ref27}. The method demonstrates that interpolation can create a regular spatial representation for regional forecasting, but prediction quality remains dependent on the assumptions and smoothing behavior of Kriging.
+Several selected studies convert sparse station observations into regional surfaces before or during prediction. SwinLSTM-Kriging interpolates meteorological and pollutant indicators from 29 stations into two-dimensional regional fields and then predicts PM$_{2.5}$ for 1-, 6-, and 24-hour horizons. The proposed SwinLSTM improved average $R^2$ by approximately 5\% over ConvLSTM \cite{ref27}. The method demonstrates that interpolation can create a regular spatial representation for regional forecasting, but prediction quality remains dependent on the assumptions and smoothing behavior of Kriging.
 
 ASTGC directly addresses fine-grained AQI estimation when monitoring stations are sparse. It separates dynamic temporal features from static spatial context and uses attention to construct a target-specific adjacency matrix from surrounding stations \cite{ref26}. STGCA uses satellite remote-sensing information with graph convolution and seq2seq prediction to generate high-resolution PM$_{2.5}$ surfaces \cite{ref21}. These approaches show that regional mapping can be integrated with forecasting, although AQI prediction and concentration prediction should remain conceptually distinct. For the present project, PM$_{2.5}$ should be estimated first and converted to AQI afterward so that model error is not hidden by categorical or piecewise AQI transformations.
 

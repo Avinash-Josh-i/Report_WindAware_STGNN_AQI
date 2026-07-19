@@ -19,13 +19,13 @@ The proposed system works as a wind-aware air quality forecasting and decision-s
 
 The initial study area for this project will be Kathmandu Valley, Nepal, covering major urban and semi-urban areas of Kathmandu, Lalitpur, and Bhaktapur. Kathmandu Valley is selected as the primary study area because it experiences high air pollution due to traffic emissions, construction activities, industrial sources, dust, seasonal variation, and its bowl-shaped geography, which can trap pollutants.
 
-In the first stage of the project, the study will focus on selected air quality monitoring stations within Kathmandu Valley. These stations will be used to collect historical pollutant data such as PM$_{2.5}$ and PM$_{10}$, along with meteorological data such as wind speed, wind direction, temperature, humidity, and pressure where available. The initially considered stations include Ratnapark, Shankapark, TU Kirtipur, Khumaltar, Bhaisipati, Pulchowk, Bhaktapur/Birendra School, and the US Embassy monitoring station. These stations are selected because they provide coverage across different parts of the valley, including dense urban areas, residential zones, and surrounding valley regions.
+In the first stage of the project, the study will focus on selected air quality monitoring stations within Kathmandu Valley. These stations will be used to collect historical PM$_{2.5}$ observations, along with meteorological data such as wind speed, wind direction, temperature, humidity, and pressure where available. The initially considered stations include Ratnapark, Shankapark, TU Kirtipur, Khumaltar, Bhaisipati, Pulchowk, Bhaktapur/Birendra School, and the US Embassy monitoring station. These stations are selected because they provide coverage across different parts of the valley, including dense urban areas, residential zones, and surrounding valley regions.
 
 For model development, each monitoring station will be represented as a node in a graph. The relationship between stations will be defined using factors such as geographical distance, wind direction, wind speed, and pollutant similarity.
 
 \subsection{Dataset Description}
 
-The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, relative humidity, and temperature. PM$_{2.5}$ concentration will serve as the target variable, whereas the remaining available variables will be used as input features. Wind speed, wind direction, atmospheric pressure, and dew point obtained from the Open-Meteo API will be considered as additional meteorological features. Wind speed and wind direction are particularly important for modeling the transport of airborne pollutants between monitoring stations. The spatial graph will therefore account for both geographical proximity and time-varying meteorological conditions.
+The currently prepared station datasets use PM$_{2.5}$ concentration as the target variable and meteorological variables as input features. Wind speed, wind direction, atmospheric pressure, humidity, temperature, precipitation, and dew point obtained from the Open-Meteo API will be considered as meteorological features. Wind speed and wind direction are particularly important for modeling the transport of airborne pollutants between monitoring stations. The spatial graph will therefore account for both geographical proximity and time-varying meteorological conditions.
 
 \Cref{tab:integrated_dataset_sample} presents the proposed structure of the integrated dataset. The values are illustrative examples included only to demonstrate the organization of the model-ready records.
 
@@ -35,23 +35,23 @@ The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, rel
     \caption{Illustrative Sample of the Integrated Dataset}
     \label{tab:integrated_dataset_sample}
     \renewcommand{\arraystretch}{1.2}
-    \setlength{\tabcolsep}{3pt}
+    \setlength{\tabcolsep}{4pt}
 
     \begin{tabularx}{0.94\linewidth}{|
-        >{\raggedright\arraybackslash}p{2.4cm}|
-        >{\raggedright\arraybackslash}p{2.1cm}|
-        >{\raggedright\arraybackslash}p{1.6cm}|
-        >{\raggedright\arraybackslash}p{1.6cm}|
-        >{\raggedright\arraybackslash}p{1.8cm}|
+        >{\raggedright\arraybackslash}p{2.6cm}|
+        >{\raggedright\arraybackslash}p{2.0cm}|
+        >{\centering\arraybackslash}p{1.5cm}|
+        >{\centering\arraybackslash}p{1.5cm}|
+        >{\centering\arraybackslash}p{1.5cm}|
         >{\raggedright\arraybackslash}X|}
         \hline
-        \textbf{Timestamp} & \textbf{Station} & \textbf{PM$_{2.5}$} & \textbf{PM$_1$} & \textbf{Wind Speed} & \textbf{Other Features} \\
+        \textbf{Timestamp} & \textbf{Station} & \textbf{PM$_{2.5}$} & \textbf{Temp.} & \textbf{Wind Spd.} & \textbf{Other Features} \\
         \hline
 
         2026-01-01 01:00 &
         Ratnapark &
         72.4 &
-        41.2 &
+        5.3 &
         1.8 &
         RH, temperature, pressure, dew point, wind direction \\
         \hline
@@ -59,7 +59,7 @@ The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, rel
         2026-01-01 01:00 &
         Khumaltar &
         58.7 &
-        33.5 &
+        5.1 &
         2.1 &
         RH, temperature, pressure, dew point, wind direction \\
         \hline
@@ -67,7 +67,7 @@ The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, rel
         2026-01-01 01:00 &
         Bhaktapur &
         64.9 &
-        37.8 &
+        4.7 &
         1.5 &
         RH, temperature, pressure, dew point, wind direction \\
         \hline
@@ -75,7 +75,7 @@ The currently downloaded OpenAQ station datasets include PM$_{2.5}$, PM$_1$, rel
     \end{tabularx}
 \end{table}
 
-In \Cref{tab:integrated_dataset_sample}, PM$_{2.5}$ and PM$_1$ concentrations are expressed in $\mu g/m^3$, relative humidity is expressed as a percentage, temperature and dew point are expressed in degrees Celsius, atmospheric pressure is expressed in hPa, wind speed is expressed in m/s, and wind direction is expressed in degrees. The displayed values are illustrative rather than actual observations.
+In \Cref{tab:integrated_dataset_sample}, PM$_{2.5}$ concentration is expressed in $\mu g/m^3$, relative humidity is expressed as a percentage, temperature and dew point are expressed in degrees Celsius, atmospheric pressure is expressed in hPa, wind speed is expressed in m/s, and wind direction is expressed in degrees. The displayed values are illustrative rather than actual observations.
 
 \subsection{Input Variables, Resolution and Prediction Target}
 
@@ -89,7 +89,7 @@ where each row represents a monitoring station and each column represents a poll
 
 To capture temporal patterns, the model will use a sliding window of past observations. The default input window will be 24 hours, with a 48-hour window also tested for comparison. The primary forecasting horizon is 6 hours. Additional horizons of 1, 12, and 24 hours will be tested for comparison.
 
-The main input variables will include PM$_{2.5}$, PM$_1$, temperature, humidity, wind speed, wind direction, and temporal features such as hour of day, day of week, month, and season. Wind direction will be converted into sine and cosine components because it is a circular variable. Missingness indicators may also be added to show whether a value was observed or imputed.
+The main input variables will include historical PM$_{2.5}$, temperature, humidity, wind speed, wind direction, precipitation, pressure, dew point, and temporal features such as hour of day, day of week, month, and season. Wind direction will be converted into sine and cosine components because it is a circular variable. Missingness indicators may also be added to show whether a value was observed or imputed.
 
 The primary prediction target is future PM$_{2.5}$ concentration at each monitoring station. For station $i$ and forecasting horizon $h$, the target value is represented as:
 
@@ -109,7 +109,7 @@ Therefore, the task is formulated as a regression problem, where the model learn
 
 The collected air quality and meteorological data undergo a preprocessing stage before being used for graph construction and model training. Since the data are obtained from multiple sources, including OpenAQ and Open-Meteo, preprocessing is necessary to ensure consistency, reliability, and compatibility across all monitoring stations and environmental variables.
 
-Air quality observations and meteorological records are first aligned according to their timestamps. Since the proposed system operates on hourly observations, all records are resampled and synchronized to a common hourly interval. For each monitoring station, PM$_{2.5}$, PM$_1$, temperature, humidity, wind speed, and wind direction measurements corresponding to the same timestamp are merged into a unified observation record. This temporal alignment ensures that all input variables represent the same environmental conditions at a given time step and prevents inconsistencies during model training.
+Air quality observations and meteorological records are first aligned according to their timestamps. Since the proposed system operates on hourly observations, all records are resampled and synchronized to a common hourly interval. For each monitoring station, PM$_{2.5}$, temperature, humidity, wind speed, wind direction, pressure, precipitation, and dew point measurements corresponding to the same timestamp are merged into a unified observation record. This temporal alignment ensures that all input variables represent the same environmental conditions at a given time step and prevents inconsistencies during model training.
 
 The collected datasets are inspected for missing observations. Any missing values identified within the pollutant or meteorological variables are handled using appropriate interpolation techniques. Short gaps in continuous measurements are filled through linear interpolation, while larger missing segments may be removed if sufficient neighboring information is unavailable. This process helps preserve temporal continuity while reducing information loss caused by incomplete observations.
 
@@ -123,7 +123,7 @@ X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}
 
 where $X$ represents the original feature value, $X_{min}$ is the minimum observed value, and $X_{max}$ is the maximum observed value within the training dataset.
 
-After preprocessing and normalization, the sequential observations are converted into fixed-length temporal windows for forecasting. A sliding-window approach is used to construct input sequences from historical observations. For example, if a 24-hour look-back period is selected, the model receives pollutant and meteorological observations from the previous 24 hours and predicts the PM$_{2.5}$ and PM$_1$ concentration for the next forecasting horizon.
+After preprocessing and normalization, the sequential observations are converted into fixed-length temporal windows for forecasting. A sliding-window approach is used to construct input sequences from historical observations. For example, if a 24-hour look-back period is selected, the model receives historical PM$_{2.5}$ and meteorological observations from the previous 24 hours and predicts the PM$_{2.5}$ concentration for the next forecasting horizon.
 
 The final output of the preprocessing stage is a clean, synchronized, normalized, and temporally structured dataset containing station-wise pollutant and meteorological observations. These processed records are subsequently used for dynamic graph construction and spatio-temporal forecasting.
 
@@ -140,7 +140,7 @@ G_t = (V, E_t, A_t)
 where $V$ represents the set of monitoring stations, $E_t$ represents the set of edges at time $t$, and $A_t$ represents the adjacency matrix at time $t$. Each node $v_i \in V$ corresponds to a monitoring station and is associated with a feature vector:
 
 \begin{equation}
-X_i^t = [PM_{2.5}, PM_1, Temperature, Humidity, WindSpeed, WindDirection]
+X_i^t = [PM_{2.5}, Temperature, Humidity, WindSpeed, WindDirection, Pressure, DewPoint]
 \end{equation}
 
 An edge between two stations $i$ and $j$ is defined based on geographical distance, historical pollutant correlation, wind speed, and wind direction alignment. Thus, the edge weight is defined as a composite function:
@@ -160,7 +160,7 @@ where $d_{ij}$ is the geographical distance between stations $i$ and $j$, and $\
 To capture long-term similarity in pollution patterns, historical correlation is computed as:
 
 \begin{equation}
-f_c(i,j) = \operatorname{corr}(PM2.5_i, PM2.5_j)
+f_c(i,j) = \operatorname{corr}(PM_{2.5,i}, PM_{2.5,j})
 \end{equation}
 
 The key contribution of the proposed system is the incorporation of wind-driven pollutant transport. Wind influence is modeled as:
@@ -279,7 +279,7 @@ The proposed system includes an explainability module to help interpret the pred
 
 Spatial explainability is obtained from the attention weights learned by the GAT layer. For a target station or virtual node, the attention coefficient $\alpha_{ij}$ shows how much neighboring station $j$ contributes to the prediction at node $i$. These attention values help identify the most influential stations, possible pollutant movement direction, and the effect of wind-aware graph connections. This is especially useful when estimating PM$_{2.5}$ at virtual nodes, as it can show which real monitoring stations influenced the predicted value.
 
-Feature-level explainability will be analyzed using SHAP or similar feature importance methods. This will help identify how much each input variable, such as past PM$_{2.5}$, PM$_{10}$, wind speed, wind direction, temperature, humidity, and temporal features, contributes to the final prediction. This allows the system to explain why a predicted pollution value is high or low.
+Feature-level explainability will be analyzed using SHAP or similar feature importance methods. This will help identify how much each input variable, such as historical PM$_{2.5}$, wind speed, wind direction, temperature, humidity, pressure, dew point, and temporal features, contributes to the final prediction. This allows the system to explain why a predicted pollution value is high or low.
 
 Temporal interpretability will be studied by analyzing how different historical time windows affect the forecast. Since the GRU learns from past observations, this analysis helps understand whether the prediction is mainly influenced by recent pollution spikes, delayed weather effects, or persistent pollution patterns.
 
