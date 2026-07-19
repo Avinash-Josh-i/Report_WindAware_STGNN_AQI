@@ -288,16 +288,31 @@ The explainability outputs will be presented through visualizations such as stat
 \clearpage
 \begin{samepage}
 \section{Flow Diagram}
-\Cref{fig:air_quality_flowchart} presents the overall workflow from data collection to dashboard visualization.
 
 \begin{figure}[H]
     \centering
     \begin{tikzpicture}[
         node distance=8mm,
-        process/.style={rectangle, draw, align=center, minimum width=8.2cm, minimum height=8mm},
+        startstop/.style={
+            ellipse,
+            draw,
+            align=center,
+            minimum width=4cm,
+            minimum height=8mm
+        },
+        process/.style={
+            rectangle,
+            draw,
+            align=center,
+            minimum width=8.2cm,
+            minimum height=8mm
+        },
         arrow/.style={->, thick}
     ]
-        \node[process] (start) {Start};
+
+        % Nodes
+        \node[startstop] (start) {Start};
+
         \node[process, below=of start] (collect) {Collect air quality and meteorological data};
         \node[process, below=of collect] (clean) {Clean missing and inconsistent values};
         \node[process, below=of clean] (align) {Align station data by timestamp};
@@ -305,11 +320,13 @@ The explainability outputs will be presented through visualizations such as stat
         \node[process, below=of graph] (window) {Create input time windows};
         \node[process, below=of window] (train) {Train baseline and GAT-GRU models};
         \node[process, below=of train] (predict) {Predict future pollutant levels};
-        \node[process, below=of predict] (evaluate) {Evaluate regression and peak-event metrics};
+        \node[process, below=of predict] (evaluate) {Evaluate regression};
         \node[process, below=of evaluate] (explain) {Generate prediction explanations};
         \node[process, below=of explain] (display) {Display results on dashboard};
-        \node[process, below=of display] (end) {End};
 
+        \node[startstop, below=of display] (end) {End};
+
+        % Arrows
         \draw[arrow] (start) -- (collect);
         \draw[arrow] (collect) -- (clean);
         \draw[arrow] (clean) -- (align);
@@ -321,7 +338,9 @@ The explainability outputs will be presented through visualizations such as stat
         \draw[arrow] (evaluate) -- (explain);
         \draw[arrow] (explain) -- (display);
         \draw[arrow] (display) -- (end);
+
     \end{tikzpicture}
+
     \caption{Proposed air quality forecasting workflow}
     \label{fig:air_quality_flowchart}
 \end{figure}
