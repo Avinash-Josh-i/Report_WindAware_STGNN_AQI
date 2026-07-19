@@ -1,49 +1,49 @@
 \chapter{IMPLEMENTATION DETAILS}
 
-
 \section{Dataset Extraction and Preparation}
-
 
 \subsection{Data Sources}
 
-
 Two complementary datasets were collected from publicly available environmental data
 repositories: historical air quality observations from the OpenAQ v3 API, and
-meteorological observations from the Open-Meteo Historical Weather API.
+meteorological observations from the Open-Meteo Historical Weather API. The two
+datasets were selected because atmospheric conditions play a significant role in the
+transport, dispersion, and accumulation of air pollutants.
 
-\textbf{Air Quality Dataset.} Station discovery was performed automatically by querying all
-monitoring stations located within a 25 km radius of central Kathmandu (Latitude:
-27.7172$^\circ$, Longitude: 85.3240$^\circ$). For every discovered station, the corresponding PM$_{2.5}$
-sensor ID was extracted, and hourly PM$_{2.5}$ concentration values with timestamps were
-downloaded.
+\textbf{Air Quality Dataset:} The air quality observations were collected from the
+OpenAQ v3 API, an open platform that aggregates measurements from ground-based air
+quality monitoring stations. Station discovery was performed automatically by querying
+all monitoring stations located within a 25 km radius of central Kathmandu (Latitude:
+27.7172$^\circ$, Longitude: 85.3240$^\circ$). For every discovered station, the
+corresponding PM$_{2.5}$ sensor ID was extracted, and hourly PM$_{2.5}$ concentration
+values with timestamps were downloaded.
 
 \begin{table}[H]
     \centering
     \small
     \caption{Sample Rows of \texttt{stations\_metadata.csv}}
     \label{tab:stations_metadata_sample}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabularx}{0.94\linewidth}{|X|X|X|X|X|}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|p{0.28\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.28\linewidth}|p{0.14\linewidth}|}
         \hline
-        \textbf{station} & \textbf{latitude} & \textbf{longitude} & \textbf{provider} & \textbf{first\_date} \\
+        \textbf{station} & \textbf{lat.} & \textbf{long.} & \textbf{provider} & \textbf{first\_date} \\
         \hline
-        Bagdol & 27.671706 & 85.301619 & AirGradient & 2026-02-06 \\
+        Bagdol & 27.6717 & 85.3016 & AirGradient & 2026-02-06 \\
         \hline
-        Balaju (SC-26)- GD Labs & 27.738289 & 85.302611 & Green Decision Labs and Research & 2025-10-14 \\
+        Balaju (SC-26)- GD Labs & 27.7383 & 85.3026 & Green Decision Labs and Research & 2025-10-14 \\
         \hline
-        Balkumari (SC-28)- GD Labs & 27.671069 & 85.338037 & Green Decision Labs and Research & 2025-11-06 \\
+        Balkumari (SC-28)- GD Labs & 27.6711 & 85.3380 & Green Decision Labs and Research & 2025-11-06 \\
         \hline
-        Baluwatar (SC-02) - GD Labs & 27.724944 & 85.331062 & Green Decision Labs and Research & 2025-09-25 \\
+        Baluwatar (SC-02) - GD Labs & 27.7249 & 85.3311 & Green Decision Labs and Research & 2025-09-25 \\
         \hline
-        Chhetrapati (SC-19) - GD Labs & 27.711914 & 85.306147 & Green Decision Labs and Research & 2025-10-13 \\
+        Chhetrapati (SC-19) - GD Labs & 27.7119 & 85.3061 & Green Decision Labs and Research & 2025-10-13 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
-
-\textit{Note: \texttt{station\_coverage.csv} shows that some initially discovered stations, such as
-Bagdol, have zero associated air-quality files despite valid weather data -- such
-stations are correctly excluded from model training and evaluation.}
+\textit{Note: \texttt{station\_coverage.csv} shows that some initially discovered
+stations, such as Bagdol, have zero associated air-quality files despite valid weather
+data -- such stations are correctly excluded from model training and evaluation.}
 
 \begin{table}[H]
     \centering
@@ -51,7 +51,7 @@ stations are correctly excluded from model training and evaluation.}
     \caption{Sample of Extracted Air-Quality Data}
     \label{tab:extracted_air_quality_sample}
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabularx}{0.94\linewidth}{|X|X|}
+    \begin{tabular}{|c|c|}
         \hline
         \textbf{timestamp} & \textbf{pm2\_5} \\
         \hline
@@ -65,14 +65,17 @@ stations are correctly excluded from model training and evaluation.}
         \hline
         2026-01-05T18:00:00+05:45 & 37.0 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
-
-\textbf{Meteorological Dataset.} Using the latitude and longitude of each monitoring station,
-hourly weather observations were downloaded individually per station from 2021--2026,
-including temperature, relative humidity, dew point, surface pressure, wind speed, wind
-direction, and precipitation.
+\textbf{Meteorological Dataset:} Meteorological observations were obtained using the
+Open-Meteo Historical Weather API. Using the latitude and longitude of each monitoring
+station, hourly weather observations were downloaded individually per station from
+2021--2026, including temperature, relative humidity, dew point, surface pressure, wind
+speed, wind direction, and precipitation. Among these, wind speed and wind direction are
+particularly important, since they are later used during graph construction to model
+pollutant transport between monitoring stations, as well as being used directly as node
+features.
 
 \begin{table}[H]
     \centering
@@ -80,15 +83,9 @@ direction, and precipitation.
     \caption{Sample of Meteorological Data for Embassy Kathmandu Station}
     \label{tab:meteorological_data_sample}
     \renewcommand{\arraystretch}{1.3}
-    \begin{tabularx}{\linewidth}{|X|c|c|c|c|c|c|}
+    \begin{tabular}{|p{0.20\linewidth}|c|c|c|c|c|c|}
         \hline
-        \textbf{Timestamp} &
-        \textbf{Temp.} &
-        \textbf{Hum.} &
-        \textbf{Dew Pt.} &
-        \textbf{Press.} &
-        \textbf{Wind Spd.} &
-        \textbf{Wind Dir.} \\
+        \textbf{Timestamp} & \textbf{Temp.} & \textbf{Hum.} & \textbf{Dew Pt.} & \textbf{Press.} & \textbf{Wind Spd.} & \textbf{Wind Dir.} \\
         \hline
         2026-01-01 00:00 & 5.3 & 94 & 4.5 & 862.1 & 2.6 & 124 \\
         \hline
@@ -100,164 +97,139 @@ direction, and precipitation.
         \hline
         2026-01-01 04:00 & 4.3 & 92 & 3.1 & 860.4 & 8.2 & 112 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
-
 
 \subsection{Dataset Extraction Pipeline}
 
+The dataset extraction process was implemented as an automated, modular pipeline
+consisting of several independent scripts. Each script performed a specific task and
+produced an intermediate output that serves as the input for the next stage.
 
-The extraction and preparation process was implemented as an automated, modular
-pipeline of numbered, independent scripts, each reading from a defined input directory
-and writing to a defined output directory.
-
-All stages are orchestrated by a single driver script that runs every stage in order
-and halts at the first failing stage, ensuring the pipeline cannot silently run out of
-sequence.
+Each stage is implemented as an independent Python module, and all stages are
+orchestrated by a single driver script that runs every stage in order and halts at the
+first failing stage, allowing the pipeline to be executed either step-by-step or
+automatically end-to-end.
 
 \subsection{Dataset Description and Organization}
 
+The collected dataset consists of hourly observations from multiple air quality
+monitoring stations distributed across the Kathmandu Valley. Each observation
+corresponds to a single timestamp at a particular monitoring station and contains both
+pollutant concentrations and the associated weather conditions. Since the data are
+collected independently for each station, the complete dataset is represented as
+multiple station-wise CSV files, where each file stores the temporal observations of a
+single monitoring station.
 
-The collected dataset consists of hourly observations from 49 usable air quality
-monitoring stations across Kathmandu Valley, each stored as an independent station-wise
-CSV file, alongside a station metadata file recording geographical coordinates for use
-in graph construction.
+In addition to the station-wise observations, a separate station metadata file is
+maintained containing the geographical information of every monitoring station,
+including its latitude and longitude, and serves as the basis for subsequent graph
+construction. The overall dataset therefore consists of:
+
+\begin{itemize}
+    \item Station-wise air quality and meteorological observations (49 stations with usable PM$_{2.5}$ records)
+    \item Station metadata containing geographical information
+    \item Common hourly timestamps for temporal synchronization
+\end{itemize}
 
 \subsection{Feature Description}
 
+The collected datasets contain both air quality measurements and meteorological
+observations. Each variable contributes different information required for
+forecasting future PM$_{2.5}$ concentrations.
 
-PM$_{2.5}$ is used as the prediction target. Meteorological variables (temperature,
-humidity, dew point, pressure, wind speed, wind direction, precipitation) serve as
-explanatory input features. Latitude and longitude are reserved for graph construction
-rather than used as direct prediction inputs.
+\textbf{Air Quality Features:} PM$_{2.5}$ (prediction target), PM1 (recorded where
+available, though not present in the final collected dataset used for modeling).
 
-\subsection{Data Preprocessing}
+\textbf{Meteorological Features:} temperature, relative humidity, dew point, surface
+pressure, wind speed, wind direction, precipitation.
 
+Among these features, PM$_{2.5}$ is used as the prediction target, while the remaining
+meteorological variables serve as explanatory input features. The spatial attributes
+(latitude and longitude) are used during graph construction rather than as direct
+prediction inputs. Following preprocessing, additional engineered variables -- lag
+features, rolling statistics, cyclical time encodings, and wind vector components --
+were generated to improve the predictive capability of the forecasting models; these
+are described in Section 5.5.
 
-\textbf{Dataset Validation.} An automated validation process checks file readability, row/column
-counts, duplicate timestamps, missing values, and chronological ordering, producing
-\texttt{weather\_validation.csv} and \texttt{air\_quality\_validation.csv}.
+\section{Data Preprocessing}
 
-\textbf{Dataset Profiling.} Following validation, a profiling stage summarizes observation
-counts, valid/missing PM$_{2.5}$ records, and overall coverage per station in
-\texttt{station\_coverage.csv}, used to decide which stations proceed to merging.
+The raw datasets collected from OpenAQ and Open-Meteo cannot be used directly for
+machine learning because they originate from different sources, have different
+structures, and contain inconsistencies such as missing timestamps or incomplete
+measurements. A systematic preprocessing pipeline was therefore developed to transform
+the raw data into a clean, synchronized, model-ready dataset.
 
-\textbf{Timestamp Normalization and Merging.} Air-quality timestamps (timezone-aware) and
-weather timestamps (timezone-naive) are converted to a common, timezone-free, hourly
-format. For each station, air-quality data is \textbf{left-joined onto the weather timeline}
-(weather as the base table), since Open-Meteo's historical record is continuous at
-hourly resolution. This guarantees one row per hour in the merged dataset, with \texttt{pm2\_5}
-left as \texttt{NaN} wherever no reading exists -- a property later relied upon for
-row-position-based feature engineering.
+\subsection{Dataset Validation}
 
-\begin{table}[H]
-    \centering
-    \footnotesize
-    \caption{Example of Merged Dataset for Embassy Kathmandu Station}
-    \label{tab:merged_dataset_sample}
-    \renewcommand{\arraystretch}{1.3}
-    \begin{tabularx}{\linewidth}{|X|c|c|c|c|c|c|X|}
-        \hline
-        \textbf{Timestamp} &
-        \textbf{Temp.} &
-        \textbf{Hum.} &
-        \textbf{Dew Pt.} &
-        \textbf{Press.} &
-        \textbf{Wind Spd.} &
-        \textbf{Wind Dir.} &
-        \textbf{Station} \\
-        \hline
+After downloading the weather and air-quality datasets, an automated validation process
+was performed to verify the integrity and consistency of the collected data. Since the
+project contains multiple CSV files across different stations and years, the
+validation process automatically inspects every file and generates summary reports.
+For every dataset, the validation script checks:
 
-        2021-01-01 00:00 &
-        4.9 &
-        71 &
-        0.0 &
-        864.5 &
-        3.6 &
-        143 &
-        Embassy Kathmandu \\
-        \hline
+\begin{itemize}
+    \item File readability (corrupted or valid)
+    \item Number of rows and columns
+    \item Duplicate timestamps
+    \item Missing values
+    \item First and last timestamps
+    \item Chronological ordering of timestamps
+\end{itemize}
 
-        2021-01-01 01:00 &
-        4.0 &
-        74 &
-        -0.1 &
-        863.6 &
-        3.6 &
-        135 &
-        Embassy Kathmandu \\
-        \hline
-
-        2021-01-01 02:00 &
-        3.1 &
-        78 &
-        -0.4 &
-        862.9 &
-        4.3 &
-        132 &
-        Embassy Kathmandu \\
-        \hline
-    \end{tabularx}
-\end{table}
-
-
-\textit{Note: \texttt{pm2\_5} and the engineered lag/rolling/wind-vector columns sit further to the
-right of this table in the actual file and are not shown here -- this sample is only
-meant to illustrate the weather-side left join described in Section 5.1.5.}
-
-\begin{table}[H]
-\centering
-\small
-\caption{Dataset Validation Summary}
-\label{tab:dataset_validation_summary}
-\renewcommand{\arraystretch}{1.3}
-
-\begin{tabularx}{\linewidth}{|
->{\raggedright\arraybackslash}X|
->{\raggedright\arraybackslash}X|
-c|c|c|c|}
-\hline
-\textbf{Station} &
-\textbf{File} &
-\textbf{Status} &
-\textbf{Rows} &
-\textbf{Duplicates} &
-\textbf{Missing Values} \\
-\hline
-Bagdol &
-Bagdol\_2021.csv &
-OK &
-8760 &
-0 &
-0 \\
-\hline
-Balaju (SC-26)-GD Labs &
-Balaju (SC-26)-GD Labs\_2021.csv &
-OK &
-8760 &
-0 &
-0 \\
-\hline
-Balaju (SC-26)-GD Labs &
-Balaju (SC-26)-GD Labs\_2025.csv &
-OK &
-457 &
-0 &
-0 \\
-\hline
-\end{tabularx}
-\end{table}
-
+Based on these checks, two validation reports -- \texttt{weather\_validation.csv} and
+\texttt{air\_quality\_validation.csv} -- are generated, summarizing the quality of each
+dataset before proceeding to preprocessing.
 
 \begin{table}[H]
     \centering
     \small
-    \caption{Station Coverage Summary}
-    \label{tab:station_coverage_summary}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabularx}{0.94\linewidth}{|X|X|X|X|X|}
+    \caption{Dataset Validation Summary (Sample)}
+    \label{tab:dataset_validation_summary}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|p{0.40\linewidth}|c|c|c|c|c|}
         \hline
-        \textbf{station} & \textbf{weather\_rows} & \textbf{air\_quality\_rows} & \textbf{valid\_pm25} & \textbf{coverage (\%)} \\
+        \textbf{Station} & \textbf{Year} & \textbf{Status} & \textbf{Rows} & \textbf{Dup.} & \textbf{Missing} \\
+        \hline
+        Bagdol & 2021 & OK & 8760 & 0 & 0 \\
+        \hline
+        Balaju (SC-26)- GD Labs & 2021 & OK & 8760 & 0 & 0 \\
+        \hline
+        Balaju (SC-26)- GD Labs & 2025 & OK & 457 & 0 & 0 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Dataset Profiling}
+
+Following validation, an automated profiling process summarizes the characteristics of
+each dataset and provides station-wise data coverage before further preprocessing. For
+each weather and air-quality file, the profiling script records:
+
+\begin{itemize}
+    \item Number of observations (rows)
+    \item Number of attributes (columns)
+    \item First and last timestamps
+    \item Missing values (weather dataset)
+    \item Valid and missing PM$_{2.5}$ observations (air-quality dataset)
+\end{itemize}
+
+In addition, a station coverage report is generated by combining the weather and
+air-quality summaries, presenting the number of weather files, air-quality files, valid
+PM$_{2.5}$ records, missing PM$_{2.5}$ records, and overall PM$_{2.5}$ coverage per
+station. The generated profiling reports are \texttt{weather\_profile.csv},
+\texttt{air\_quality\_profile.csv}, and \texttt{station\_coverage.csv}, which together
+help assess data availability before proceeding to feature engineering.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Station Coverage Summary (Sample)}
+    \label{tab:station_coverage_summary}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|p{0.32\linewidth}|c|c|c|c|}
+        \hline
+        \textbf{Station} & \textbf{Weather Rows} & \textbf{AQ Rows} & \textbf{Valid PM2.5} & \textbf{Coverage (\%)} \\
         \hline
         Bagdol & 48,432 & 0 & 0 & 0.0 \\
         \hline
@@ -267,37 +239,163 @@ OK &
         \hline
         Embassy Kathmandu & 48,432 & 41,915 & 32,689 & 67.49 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
+\textit{Note: Coverage (\%) reflects the proportion of the full weather timeline for
+which PM$_{2.5}$ readings exist -- stations with 0\% coverage (e.g. Bagdol) have a
+weather record but no associated air-quality sensor data, and are excluded from
+modeling.}
 
-\textit{Note: \texttt{coverage (\%)} reflects the proportion of the full weather timeline for which
-PM$_{2.5}$ readings exist -- stations with 0\% coverage (e.g. Bagdol) have a weather record
-but no associated air-quality sensor data, and are excluded from modeling.}
+\subsection{Timestamp Normalization}
 
-\textbf{Removal of Initial Missing PM$_{2.5}$ Records.} Leading rows before the first valid PM$_{2.5}$
-reading are trimmed per station; internal gaps occurring later are preserved for the
-target-invalidation logic described below.
-
-\textbf{Timestamp Continuity Validation.} Immediately after trimming, and \textit{before} feature
-engineering, an automated gap check computes the interval between every pair of
-consecutive timestamps per station, flagging any interval that is not exactly one hour.
-This step is placed before feature engineering deliberately, since the lag/rolling
-features described next rely on row position corresponding to real elapsed time.
-
-\textbf{Feature Engineering.} The following features are generated per station:
+The weather and air-quality datasets originate from two different APIs, and although
+both provide hourly observations, their timestamp formats are not always identical.
+Timestamps were therefore standardized before merging. During this stage:
 
 \begin{itemize}
-    \item \textit{Lag features}: \texttt{lag\_1}, \texttt{lag\_3}, \texttt{lag\_6}, \texttt{lag\_12}, \texttt{lag\_24} (PM$_{2.5}$ at 1--24 hours prior)
-    \item \textit{Rolling statistics}: rolling mean and rolling standard deviation over 3-, 6-, and 24-hour windows
-    \item \textit{Cyclical time features}: \texttt{hour\_sin}/\texttt{hour\_cos}, \texttt{month\_sin}/\texttt{month\_cos}
-    \item \textit{Wind vector components}: $$wind_u = WindSpeed \cdot \cos(\theta), \qquad wind_v = WindSpeed \cdot \sin(\theta)$$
+    \item Timestamps were converted into a common datetime format
+    \item Timezone inconsistencies were removed
+    \item Timestamps were sorted chronologically
+    \item Duplicate timestamps were eliminated
 \end{itemize}
 
-\textbf{Dataset Preparation and Target Definition.} The prediction target is defined as
-PM$_{2.5}$ one hour ahead: $target\_pm2\_5(t) = pm2\_5(t+1)$. A naive \texttt{.shift(-1)}
-implementation is unsafe across timestamp gaps, since it grabs whichever row is next in
-the file regardless of real elapsed time. To prevent mislabeled targets, the target is
+After normalization, every observation followed the same temporal representation,
+allowing accurate alignment between weather variables and PM$_{2.5}$ measurements.
+
+\subsection{Dataset Synchronization and Merging}
+
+Since weather and air-quality observations are collected independently, they must be
+synchronized on their standardized timestamps before model training. For each
+monitoring station, air-quality data is left-joined onto the weather timeline
+(weather as the base table), since Open-Meteo's historical record is continuous at
+hourly resolution. This guarantees one row per hour in the merged dataset, with
+\texttt{pm2\_5} left as \texttt{NaN} wherever no reading exists (a property later
+relied upon for row-position-based feature engineering).
+
+The merged dataset therefore contains:
+
+\begin{itemize}
+    \item PM$_{2.5}$ concentration
+    \item Temperature
+    \item Relative humidity
+    \item Dew point
+    \item Atmospheric pressure
+    \item Wind speed
+    \item Wind direction
+    \item Precipitation
+    \item Station information
+    \item Geographical coordinates
+\end{itemize}
+
+This merged dataset forms the primary input for subsequent preprocessing and feature
+engineering stages.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Example of Merged Dataset for Embassy Kathmandu Station}
+    \label{tab:merged_dataset_sample}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|p{0.15\linewidth}|c|c|c|c|c|c|p{0.16\linewidth}|}
+        \hline
+        \textbf{Timestamp} & \textbf{Temp.} & \textbf{Hum.} & \textbf{Dew Pt.} & \textbf{Press.} & \textbf{Wind Spd.} & \textbf{Wind Dir.} & \textbf{Station} \\
+        \hline
+        2021-01-01 00:00 & 4.9 & 71 & 0.0 & 864.5 & 3.6 & 143 & Embassy Kathmandu \\
+        \hline
+        2021-01-01 01:00 & 4.0 & 74 & -0.1 & 863.6 & 3.6 & 135 & Embassy Kathmandu \\
+        \hline
+        2021-01-01 02:00 & 3.1 & 78 & -0.4 & 862.9 & 4.3 & 132 & Embassy Kathmandu \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\textit{Note: \texttt{pm2\_5} and the engineered lag/rolling/wind-vector columns sit
+further to the right of this table in the actual file and are not shown here -- this
+sample only illustrates the weather-side left join.}
+
+\subsection{Removal of Initial Missing PM$_{2.5}$ Records}
+
+After merging, some stations contain long initial periods where weather observations
+are available but PM$_{2.5}$ measurements have not yet started. These rows do not
+contribute useful information for forecasting, since the target variable is absent.
+This trimming process:
+
+\begin{itemize}
+    \item Removes unnecessary records
+    \item Reduces storage requirements
+    \item Ensures that every remaining observation contains the target pollutant
+    \item Simplifies later feature generation
+\end{itemize}
+
+Only leading missing records were removed; missing values occurring later in a
+station's timeline were preserved for the target-invalidation logic described in
+Section 5.7.
+
+\subsection{Timestamp Continuity Validation}
+
+After merging and trimming -- and \textit{before} feature engineering -- an additional
+verification step confirms that the temporal sequence remains continuous. This stage
+checks:
+
+\begin{itemize}
+    \item Hourly interval consistency
+    \item Chronological ordering
+    \item Missing timestamps
+    \item Duplicated timestamps
+    \item Unexpected temporal gaps
+\end{itemize}
+
+Maintaining correct temporal ordering at this stage is particularly important because
+forecasting models such as LSTM, GRU, and Graph Neural Networks rely on sequential
+dependencies between observations, and the lag/rolling features generated in the next
+stage rely on row position corresponding to real elapsed time. Any inconsistencies
+detected are reported automatically per station.
+
+\subsection{Feature Engineering}
+
+Once timestamp continuity was verified, additional predictive features were generated
+per station:
+
+\textit{Lag Features.} Historical PM$_{2.5}$ observations are introduced as predictor
+variables to capture temporal dependency, allowing the forecasting models to utilize
+recent pollution history: \texttt{lag\_1}, \texttt{lag\_3}, \texttt{lag\_6},
+\texttt{lag\_12}, \texttt{lag\_24} (PM$_{2.5}$ at 1, 3, 6, 12, and 24 hours prior).
+
+\textit{Rolling Statistical Features.} Moving statistical measures summarize recent
+pollutant behavior over fixed windows, capturing short-term pollution trends and
+variability: rolling mean and rolling standard deviation over 3-, 6-, and 24-hour
+windows.
+
+\textit{Cyclical Time Features.} Time variables such as hour of day and month of year
+exhibit periodic behavior and are therefore encoded using sine/cosine pairs
+(\texttt{hour\_sin}/\texttt{hour\_cos}, \texttt{month\_sin}/\texttt{month\_cos}) rather
+than raw integers. This encoding preserves the cyclic nature of these variables and
+avoids an artificial discontinuity between, e.g., hour 23 and hour 0. \textit{A
+cyclical encoding of day-of-week was considered during planning but is not present in
+the current implementation; the raw \texttt{weekday} column is retained instead and is
+a candidate for future refinement.}
+
+\textit{Wind Vector Components.} Rather than using wind speed and wind direction
+independently, they are transformed into Cartesian vector components:
+$$wind_u = WindSpeed \cdot \cos(\theta), \qquad wind_v = WindSpeed \cdot \sin(\theta)$$
+where $\theta$ is the wind direction. This representation preserves both wind magnitude
+and direction, is more suitable for machine learning models than the raw polar form,
+and provides the foundation for the wind-aware graph construction described in
+Section 5.9.
+
+\subsection{Dataset Preparation and Target Definition}
+
+Following feature engineering, the dataset was transformed into its final
+machine-learning-ready form. This stage includes selecting the relevant predictor
+variables, defining the PM$_{2.5}$ prediction target, removing unused attributes, and
+arranging columns into a consistent format.
+
+The prediction target itself is defined as the PM$_{2.5}$ concentration one hour ahead
+of the current observation: $target\_pm2\_5(t) = pm2\_5(t+1)$. A naive
+\texttt{.shift(-1)} implementation of this is unsafe in the presence of timestamp gaps,
+since it grabs whichever row happens to sit next in the file, regardless of how much
+real time separates it from the current row. To prevent this, the target is
 invalidated whenever the true gap to the next row is not exactly one hour:
 
 \begin{verbatim}
@@ -310,33 +408,49 @@ df.loc[time_gap != pd.Timedelta(hours=1),
 \end{verbatim}
 
 Rows with an invalidated or otherwise missing target are dropped, and the number of
-rows removed is logged per station.
+rows removed is logged per station. At the end of this stage, each observation
+contains all engineered features together with a reliably-labeled target PM$_{2.5}$
+value.
 
-\textbf{Train / Validation / Test Split.} The prepared dataset was split chronologically
-(not randomly) per station: 70\% training, 15\% validation, 15\% testing, to prevent
-information leakage from future observations and reflect a realistic forecasting
-scenario.
+\subsection{Train / Validation / Test Split}
 
-\textbf{Split Verification.} An automated check confirms correct sample counts,
-chronological ordering, absence of overlapping timestamps, and successful three-way
-separation before any station's data is used for model training.
+The prepared dataset was divided into three mutually exclusive, chronologically
+ordered subsets per station: training, validation, and testing. Chronological (rather
+than random) splitting was adopted to prevent information leakage from future
+observations into past data and to reflect a realistic forecasting scenario. The
+training dataset is used for model learning, the validation dataset for hyperparameter
+tuning, and the testing dataset for final performance evaluation.
+
+\subsection{Split Verification}
+
+An automated verification process confirms that the generated datasets satisfy the
+required conditions:
+
+\begin{itemize}
+    \item Correct number of samples
+    \item Chronological ordering
+    \item Absence of overlapping timestamps between subsets
+    \item Successful separation of training, validation, and testing data
+    \item Sufficient observations for model training
+\end{itemize}
+
+Only after successful verification are the datasets considered ready for baseline model
+training (Persistence and Ridge Regression).
 
 \section{Baseline Forecasting Models}
 
-
 \subsection{Persistence Baseline}
 
-
-Predicts next-hour PM$_{2.5}$ as equal to the current reading: $\hat{y}_{t+1} = pm2\_5(t)$.
-Despite its simplicity, this is a strong baseline for short-horizon PM$_{2.5}$ forecasting,
-since pollution levels change relatively little hour to hour.
+Predicts next-hour PM$_{2.5}$ as equal to the current reading:
+$\hat{y}_{t+1} = pm2\_5(t)$. Despite its simplicity, this is a strong baseline for
+short-horizon PM$_{2.5}$ forecasting, since pollution levels change relatively little
+hour to hour.
 
 \subsection{Linear (Ridge) Regression Baseline}
 
-
-\textbf{Initial attempt and multicollinearity issue.} The first implementation used ordinary
-least squares (OLS) with every engineered column as input. This produced an average
-test $R^2$ of \textbf{-2.98}, substantially worse than persistence, with some station
+\textbf{Initial attempt and multicollinearity issue:} The first implementation used
+ordinary least squares (OLS) with every engineered column as input. This produced an
+average test $R^2$ of -2.98, substantially worse than persistence, with some station
 predictions falling far outside the physically plausible PM$_{2.5}$ range.
 
 A feature correlation analysis revealed severe multicollinearity among the engineered
@@ -348,7 +462,7 @@ PM$_{2.5}$-derived columns:
     \caption{Selected Feature-Pair Correlations}
     \label{tab:selected_feature_pair_correlations}
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabularx}{0.94\linewidth}{|X|X|}
+    \begin{tabular}{|l|c|}
         \hline
         \textbf{Feature pair} & \textbf{Correlation} \\
         \hline
@@ -364,26 +478,25 @@ PM$_{2.5}$-derived columns:
         \hline
         \texttt{wind\_direction} vs \texttt{wind\_u} & 0.545 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
-
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.92\textwidth]{src/images/figures/fig_correlation_heatmap.png}
+    \includegraphics[width=0.75\textwidth]{src/images/figures/fig_correlation_heatmap.png}
     \caption{Correlation heatmap of engineered features}
     \label{fig:correlation_heatmap}
 \end{figure}
 
-
 With input columns this collinear, the design matrix for several stations had a
 condition number on the order of $10^{16}$--$10^{18}$ (a well-conditioned matrix is
-typically $10^2$--$10^4$), causing unstable OLS coefficients and unbounded predictions.
+typically $10^2$--$10^4$), causing unstable OLS coefficients and unbounded
+predictions.
 
-\textbf{Fix.} Two changes were made: (1) switching from plain \texttt{LinearRegression} to
-\texttt{Ridge(alpha=10.0)}, which penalizes large coefficients; and (2) pruning the feature set
-to one representative per group of near-duplicate columns, selected by correlation with
-the target rather than dropped arbitrarily:
+\textbf{Fix.} Two changes were made: (1) switching from plain \texttt{LinearRegression}
+to \texttt{Ridge(alpha=10.0)}, which penalizes large coefficients; and (2) pruning the
+feature set to one representative per group of near-duplicate columns, selected by
+correlation with the target rather than dropped arbitrarily:
 
 \begin{table}[H]
     \centering
@@ -391,7 +504,7 @@ the target rather than dropped arbitrarily:
     \caption{Target Correlation of Candidate Features}
     \label{tab:target_correlation_candidate_features}
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabularx}{0.94\linewidth}{|X|X|}
+    \begin{tabular}{|l|c|}
         \hline
         \textbf{Feature} & \textbf{Correlation with target} \\
         \hline
@@ -407,17 +520,15 @@ the target rather than dropped arbitrarily:
         \hline
         \texttt{lag\_24} & 0.725 \\
         \hline
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
-
-The final feature set retains \texttt{pm2\_5}, \texttt{lag\_6}, \texttt{lag\_24}, \texttt{rolling\_mean\_6},
-\texttt{rolling\_std\_6}, the cyclical time encodings, the wind vector components, and the
-remaining meteorological variables, with redundant lag/rolling duplicates and raw wind
-direction removed.
+The final feature set retains \texttt{pm2\_5}, \texttt{lag\_6}, \texttt{lag\_24},
+\texttt{rolling\_mean\_6}, \texttt{rolling\_std\_6}, the cyclical time encodings, the
+wind vector components, and the remaining meteorological variables, with redundant
+lag/rolling duplicates and raw wind direction removed.
 
 \section{Wind-Aware Graph Construction (In Progress)}
-
 
 Development of the wind-aware dynamic graph module has begun as a separate pipeline.
 
