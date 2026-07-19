@@ -1,8 +1,19 @@
 \chapter{RESULTS AND ANALYSIS}
 
+This chapter presents the evaluation of the baseline forecasting models described in
+Chapter 5, using the chronologically split test set and the regression metrics defined
+in Section 4.5.1 (MAE, RMSE, and $R^2$). Results are reported both as an aggregate
+across all 49 monitoring stations and, where the aggregate is misleading, on a
+per-station basis. The chapter also documents a data-quality investigation that was
+carried out to explain the station-level results.
 
 \section{Baseline Model Comparison}
 
+Two baseline models were evaluated: a persistence baseline, and a linear regression
+model, the latter tested across three feature configurations to isolate the effect of
+regularization and feature pruning (see Section 5.2.2). Table~\ref{tab:baseline_model_comparison}
+summarizes the average test-set performance for each configuration, and
+Figure~\ref{fig:model_comparison} presents the same comparison visually.
 
 \begin{table}[H]
     \centering
@@ -25,7 +36,6 @@
     \end{tabularx}
 \end{table}
 
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{src/images/figures/fig_model_comparison.png}
@@ -33,17 +43,30 @@
     \label{fig:model_comparison}
 \end{figure}
 
-
-The final Ridge model remains slightly below the persistence baseline. This is expected
-at this stage: persistence is a strong baseline for one-hour-ahead PM$_{2.5}$ forecasting
-since pollution levels change little hour to hour, and a linear model using only a
-single station's own history has limited additional signal to extract. The wind-aware
-graph structure (Section 5.3) is intended to supply the additional spatial signal --
-from neighboring, upwind stations -- needed to meaningfully exceed the persistence
-baseline.
+The plain OLS configuration performs far worse than even the persistence baseline
+($R^2 = -2.982$), with the final Ridge configuration recovering to $R^2 = 0.448$. The
+final Ridge model still remains slightly below the persistence baseline, which is
+expected at this stage: persistence is a strong baseline for one-hour-ahead PM$_{2.5}$
+forecasting since pollution levels change little hour to hour, and a linear model using
+only a single station's own history has limited additional signal to extract. The
+wind-aware graph structure (Section 5.3) is intended to supply the additional spatial
+signal -- from neighboring, upwind stations -- needed to meaningfully exceed the
+persistence baseline. The large gap between the OLS and Ridge configurations in
+Table~\ref{tab:baseline_model_comparison}, however, is too large to be explained by
+persistence alone, and was investigated further.
 
 \section{Impact of Regularization on Model Generalization}
 
+The unusually poor OLS result prompted a feature correlation analysis, which revealed
+severe multicollinearity among the engineered PM$_{2.5}$-derived features (e.g., a
+Pearson correlation of 0.968 between \texttt{lag\_1} and \texttt{rolling\_mean\_3}). With
+input columns this collinear, the OLS design matrix for several stations had a
+condition number on the order of $10^{16}$--$10^{18}$ (a well-conditioned matrix is
+typically $10^2$--$10^4$), causing unstable, unbounded coefficient estimates.
+Table~\ref{tab:regularization_generalization_impact} summarizes the effect of
+addressing this through regularization and feature pruning, and
+Figure~\ref{fig:ols_vs_ridge} illustrates the effect directly on one representative
+station.
 
 \begin{table}[H]
     \centering
@@ -64,7 +87,6 @@ baseline.
     \end{tabularx}
 \end{table}
 
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{src/images/figures/fig_ols_vs_ridge_scatter.png}
@@ -72,11 +94,20 @@ baseline.
     \label{fig:ols_vs_ridge}
 \end{figure}
 
+Figure~\ref{fig:ols_vs_ridge} shows actual-versus-predicted PM$_{2.5}$ on the test set
+for a station where the OLS model produced physically implausible predictions.
+Switching to Ridge regression brings predictions back within a realistic range, and
+pruning the redundant lag/rolling features (Section 5.2.2) improves the mean $R^2$
+further, from 0.415 to 0.448. This confirms that the OLS failure was a numerical
+instability caused by feature redundancy, rather than a flaw in the underlying linear
+modeling approach.
 
 \section{Station-wise Performance and Outlier Analysis}
 
-
-Per-station results for the final Ridge model show a wide but largely healthy spread:
+The aggregate Ridge result reported in Table~\ref{tab:baseline_model_comparison} is a
+mean across 49 stations, which can obscure whether performance is broadly consistent or
+driven by a small number of poorly performing stations. Per-station results, shown in
+Figure~\ref{fig:station_r2}, indicate a wide but largely healthy spread:
 
 \begin{itemize}
     \item Median $R^2$ across 49 stations: \textbf{0.560} (higher than the mean of 0.448, since the mean is pulled down by a small number of underperforming stations)
@@ -91,21 +122,26 @@ Per-station results for the final Ridge model show a wide but largely healthy sp
     \label{fig:station_r2}
 \end{figure}
 
-
-One station, \textbf{Gothatar}, remains a clear outlier ($R^2 = -3.32$, MAE = 16.5) despite a
-comparatively large training set (1,620 rows) -- traced in Section 6.4 to a large data
-gap in its history. Two stations with short monitoring histories -- \textbf{Ramkot} (206
-total rows) and \textbf{Sifal} (116 total rows) -- were initially suspected of underperforming
-due to insufficient training data; after feature pruning, both achieved reasonable
-$R^2$ (0.40 and 0.67 respectively), indicating that multicollinearity, not data volume,
-was the dominant issue for most stations.
+One station, \textbf{Gothatar}, remains a clear outlier ($R^2 = -3.32$, MAE = 16.5) in
+Figure~\ref{fig:station_r2} despite a comparatively large training set (1,620 rows) --
+traced in Section~\ref{sec:timestamp_continuity} to a large data gap in its history. Two
+stations with short monitoring histories -- \textbf{Ramkot} (206 total rows) and
+\textbf{Sifal} (116 total rows) -- were initially suspected of underperforming due to
+insufficient training data; after feature pruning, both achieved reasonable $R^2$ (0.40
+and 0.67 respectively), indicating that multicollinearity, not data volume, was the
+dominant issue for most stations. Gothatar's outlier status, however, remained
+unexplained by the modeling fixes alone, which motivated a direct investigation of its
+underlying data quality.
 
 \section{Timestamp Continuity Findings}
+\label{sec:timestamp_continuity}
 
-
-Timestamp continuity validation was run across all 49 prepared station files. Overall
-data quality was high: every station exceeded 93\% valid (exactly one-hour) gaps between
-consecutive readings, with most stations at 98--99\%.
+To investigate the Gothatar outlier and confirm overall data reliability, timestamp
+continuity was validated across all 49 prepared station files, checking whether
+consecutive readings are spaced exactly one hour apart (Section 5.1.5). Overall data
+quality was high: every station exceeded 93\% valid (exactly one-hour) gaps between
+consecutive readings, with most stations at 98--99\%, as shown in
+Figure~\ref{fig:timestamp_validity}.
 
 \begin{figure}[H]
     \centering
@@ -114,8 +150,7 @@ consecutive readings, with most stations at 98--99\%.
     \label{fig:timestamp_validity}
 \end{figure}
 
-
-Notable findings:
+Despite this generally high data quality, three stations stood out on closer inspection:
 
 \begin{itemize}
     \item \textbf{Gothatar} shows a single gap of approximately 2,906 hours (\textasciitilde{}121 days) despite an otherwise 98.9\% valid-gap rate -- the most likely explanation for its poor model performance, since it plausibly falls near the train/test split boundary and creates a distribution mismatch.
@@ -123,8 +158,15 @@ Notable findings:
     \item \textbf{Sifal} has zero internal gaps (100\% valid hourly spacing) but only 116 total rows -- this station simply began monitoring recently, rather than suffering data-quality issues.
 \end{itemize}
 
+This confirms that Gothatar's poor performance is a genuine data limitation rather than
+a modeling error, and distinguishes it from Ramkot and Sifal, whose short histories are
+a separate, unrelated limitation.
+
 \section{Actual vs. Predicted PM$_{2.5}$ Over Time}
 
+To illustrate model behavior beyond a single aggregate number, Figure~\ref{fig:timeseries_good_station}
+compares actual and predicted PM$_{2.5}$ over time for a well-performing station, and
+Figure~\ref{fig:timeseries_gothatar} shows the same comparison for Gothatar.
 
 \begin{figure}[H]
     \centering
@@ -133,7 +175,6 @@ Notable findings:
     \label{fig:timeseries_good_station}
 \end{figure}
 
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{src/images/figures/fig_timeseries_gothatar.png}
@@ -141,9 +182,13 @@ Notable findings:
     \label{fig:timeseries_gothatar}
 \end{figure}
 
+The representative station in Figure~\ref{fig:timeseries_good_station} shows the
+predicted series tracking the actual series closely, consistent with its high $R^2$.
+Gothatar's plot in Figure~\ref{fig:timeseries_gothatar}, by contrast, shows a visible
+divergence between predicted and actual values, consistent with the train/test
+distribution mismatch identified in Section~\ref{sec:timestamp_continuity}.
 
 \section{Summary of Key Findings}
-
 
 \begin{itemize}
     \item The persistence baseline is a genuinely strong reference point ($R^2$ = 0.708) for one-hour-ahead PM$_{2.5}$ forecasting due to the high hour-to-hour autocorrelation of pollution levels.
