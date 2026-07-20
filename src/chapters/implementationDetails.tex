@@ -68,14 +68,8 @@ data -- such stations are correctly excluded from model training and evaluation.
     \end{tabular}
 \end{table}
 
-\textbf{Meteorological Dataset:} Meteorological observations were obtained using the
-Open-Meteo Historical Weather API. Using the latitude and longitude of each monitoring
-station, hourly weather observations were downloaded individually per station from
-2021--2026, including temperature, relative humidity, dew point, surface pressure, wind
-speed, wind direction, and precipitation. Among these, wind speed and wind direction are
-particularly important, since they are later used during graph construction to model
-pollutant transport between monitoring stations, as well as being used directly as node
-features.
+\textbf{Meteorological Dataset:} Historical meteorological estimates were obtained from the Open-Meteo Historical Weather API. These variables are derived from numerical weather reanalysis and model products rather than from meteorological instruments installed at each air-quality station. Using the latitude and longitude of each monitoring station, hourly weather observations were downloaded individually. Because the meteorological data have a coarser spatial resolution than the air-quality monitoring network, local wind and terrain effects may not be fully represented. The number of unique weather grid cells used across the selected stations will therefore be examined before graph construction.
+
 
 \begin{table}[H]
     \centering
@@ -489,8 +483,8 @@ PM$_{2.5}$-derived columns:
 \end{figure}
 
 With input columns this collinear, the design matrix for several stations had a
-condition number on the order of $10^{16}$--$10^{18}$ (a well-conditioned matrix is
-typically $10^2$--$10^4$), causing unstable OLS coefficients and unbounded
+condition number on the order of $10^{16}$--$10^{18}$. A condition number close to 1 indicates strong numerical conditioning, while values approaching $10^{16}$--$10^{18}$
+indicate extreme ill-conditioning at double-precision scale., causing unstable OLS coefficients and unbounded
 predictions.
 
 \textbf{Fix.} Two changes were made: (1) switching from plain \texttt{LinearRegression}
