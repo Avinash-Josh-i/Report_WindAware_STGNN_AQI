@@ -11,7 +11,7 @@ carried out to explain the station-level results.
 
 Two baseline models were evaluated: a persistence baseline, and a linear regression
 model, the latter tested across three feature configurations to isolate the effect of
-regularization and feature pruning (see Section 5.2.2). Table~\ref{tab:baseline_model_comparison}
+regularization and feature pruning (see Section 5.3.2). Table~\ref{tab:baseline_model_comparison}
 summarizes the average test-set performance for each configuration, and
 Figure~\ref{fig:model_comparison} presents the same comparison visually.
 
@@ -49,7 +49,7 @@ final Ridge model still remains slightly below the persistence baseline, which i
 expected at this stage: persistence is a strong baseline for one-hour-ahead PM$_{2.5}$
 forecasting since pollution levels change little hour to hour, and a linear model using
 only a single station's own history has limited additional signal to extract. The
-wind-aware graph structure (Section 5.3) is intended to supply the additional spatial
+wind-aware graph structure (Section 5.4) is intended to supply the additional spatial
 signal -- from neighboring, upwind stations -- needed to meaningfully exceed the
 persistence baseline. The large gap between the OLS and Ridge configurations in
 Table~\ref{tab:baseline_model_comparison}, however, is too large to be explained by
@@ -97,7 +97,7 @@ station.
 Figure~\ref{fig:ols_vs_ridge} shows actual-versus-predicted PM$_{2.5}$ on the test set
 for a station where the OLS model produced physically implausible predictions.
 Switching to Ridge regression brings predictions back within a realistic range, and
-pruning the redundant lag/rolling features (Section 5.2.2) improves the mean $R^2$
+pruning the redundant lag/rolling features (Section 5.3.2) improves the mean $R^2$
 further, from 0.415 to 0.448. This confirms that the OLS failure was a numerical
 instability caused by feature redundancy, rather than a flaw in the underlying linear
 modeling approach.
@@ -138,7 +138,7 @@ underlying data quality.
 
 To investigate the Gothatar outlier and confirm overall data reliability, timestamp
 continuity was validated across all 49 prepared station files, checking whether
-consecutive readings are spaced exactly one hour apart (Section 5.1.5). Overall data
+consecutive readings are spaced exactly one hour apart (Section 5.2.6). Overall data
 quality was high: every station exceeded 93\% valid (exactly one-hour) gaps between
 consecutive readings, with most stations at 98--99\%, as shown in
 Figure~\ref{fig:timestamp_validity}.

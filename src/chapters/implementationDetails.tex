@@ -144,7 +144,7 @@ meteorological variables serve as explanatory input features. The spatial attrib
 prediction inputs. Following preprocessing, additional engineered variables -- lag
 features, rolling statistics, cyclical time encodings, and wind vector components --
 were generated to improve the predictive capability of the forecasting models; these
-are described in Section 5.5.
+are described in Section 5.2.7.
 
 \section{Data Preprocessing}
 
@@ -324,7 +324,7 @@ This trimming process:
 
 Only leading missing records were removed; missing values occurring later in a
 station's timeline were preserved for the target-invalidation logic described in
-Section 5.7.
+Section 5.2.8.
 
 \subsection{Timestamp Continuity Validation}
 
@@ -376,7 +376,7 @@ $$wind_u = WindSpeed \cdot \cos(\theta), \qquad wind_v = WindSpeed \cdot \sin(\t
 where $\theta$ is the wind direction. This representation preserves both wind magnitude
 and direction, is more suitable for machine learning models than the raw polar form,
 and provides the foundation for the wind-aware graph construction described in
-Section 5.9.
+Section 5.4.
 
 \subsection{Dataset Preparation and Target Definition}
 
